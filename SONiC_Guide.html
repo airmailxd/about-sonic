@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SONiC Study Guide</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f3f1ec; --text:#1d1c1a; --muted:#5f5b53;
+  --border:#e2ded5; --accent:#2f5d8a; --accent-soft:#e6eef6; --ok:#2d7a4b; --ok-soft:#e5f2ea;
+  --warn:#9a5b12; --warn-soft:#f8eddd; --code-bg:#f1efe9; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+    --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ok:#7cc79a; --ok-soft:#1f3328;
+    --warn:#e0a860; --warn-soft:#3a2d1b; --code-bg:#2a2925; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+  --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ok:#7cc79a; --ok-soft:#1f3328;
+  --warn:#e0a860; --warn-soft:#3a2d1b; --code-bg:#2a2925; --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.87em;background:var(--code-bg);padding:.1em .35em;border-radius:4px;word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:.85rem;line-height:1.5}
+pre code{background:none;padding:0}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.topbar{border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar .wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;font-size:.92rem}
+.topbar a{text-decoration:none;color:var(--muted)}
+.topbar a.active{color:var(--text);font-weight:600}
+.topbar .brand{font-weight:700;color:var(--text);margin-right:auto;text-decoration:none}
+header{padding:44px 0 22px}
+header h1{font-size:clamp(1.8rem,4vw,2.5rem);line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+header p{color:var(--muted);margin:0;max-width:72ch}
+.layout{display:grid;grid-template-columns:220px 1fr;gap:32px;align-items:start}
+nav.side{position:sticky;top:16px;font-size:.88rem;border-left:2px solid var(--border);padding-left:14px}
+nav.side ol{list-style:none;margin:0;padding:0}
+nav.side li{margin:3px 0}
+nav.side a{text-decoration:none;color:var(--muted)}
+nav.side a:hover{color:var(--accent)}
+nav.side .grp{font-weight:600;color:var(--text);margin-top:12px;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+@media (max-width:820px){.layout{grid-template-columns:1fr}nav.side{position:static;border-left:none;padding-left:0}}
+section{padding:26px 0 30px;border-top:1px solid var(--border)}
+section:first-child{border-top:none;padding-top:0}
+h2{font-size:1.5rem;margin:0 0 6px}
+.lede{color:var(--muted);margin:0 0 18px;max-width:75ch}
+h3{font-size:1.1rem;margin:22px 0 8px}
+.kicker{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow)}
+.card h4{margin:0 0 6px;font-size:1rem}
+.card p{margin:0}
+.eli5{background:var(--ok-soft);border:1px solid var(--border);border-radius:12px;padding:20px 22px;font-size:1.05rem}
+.eli5 p{margin:0 0 12px}.eli5 p:last-child{margin:0}
+.analogy{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:14px 0 0;font-size:.95rem}
+.analogy dt{font-weight:600}
+.analogy dd{margin:0;color:var(--muted)}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);margin:10px 0}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.92rem}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--border)}
+th{background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:none}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px 12px 54px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:14px;top:12px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-weight:700;display:grid;place-items:center;font-size:.88rem}
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;overflow-x:auto;margin:10px 0}
+.diagram svg{display:block;width:100%;min-width:640px;height:auto}
+.reads{font-size:.9rem;color:var(--muted);margin-top:12px}
+.reads a{margin-right:4px}
+.sd{font-size:.9rem;background:var(--surface-2);border-radius:8px;padding:10px 14px;margin-top:12px}
+.sd strong{color:var(--accent)}
+footer{padding:28px 0 60px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--border);margin-top:20px}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:10;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 14px;font:inherit;font-size:.85rem;cursor:pointer}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.s-box{fill:var(--surface-2);stroke:var(--border)}
+.s-db{fill:var(--accent-soft);stroke:var(--accent)}
+.s-hw{fill:var(--surface);stroke:var(--muted);stroke-dasharray:4 3}
+.s-t-b{fill:var(--text);font-size:13px;font-weight:600}
+.s-m{fill:var(--muted);font-size:11px}
+.s-line{stroke:var(--muted);stroke-width:1.4;fill:none}
+.s-arrow{fill:var(--muted)}
+.s-band{fill:var(--surface-2);stroke:var(--border)}
+.s-band-hw{fill:var(--warn-soft);stroke:var(--border)}
+.s-band-t{fill:var(--muted);font-size:11px;font-weight:600;letter-spacing:.06em}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a class="brand" href="index.html">About SONiC</a>
+  <a href="index.html">Home</a>
+  <a class="active" href="SONiC_Guide.html">SONiC Guide</a>
+  <a href="Key_Concepts.html">Key Concepts</a>
+  <a href="System_Design_QA.html">System Design Q&amp;A</a>
+  <a href="SONiC_vs_Ceph.html">SONiC vs Ceph</a>
+  <a href="https://github.com/sonic-net/SONiC/blob/master/README.md">Repo README</a>
+</div></div>
+
+<header><div class="wrap">
+  <span class="kicker">Page 1 of 4 · SONiC</span>
+  <h1>SONiC, from first principles</h1>
+  <p>Start with the simple version, then learn what SONiC is for and how its parts fit together. After that, the deep dives cover each subsystem, with links to the design docs in <a href="https://github.com/sonic-net/SONiC">sonic-net/SONiC</a> (<code>doc/</code>). For interview practice, the companion <a href="System_Design_QA.html">System Design Q&amp;A</a> page uses these same ideas as examples.</p>
+</div></header>
+
+<div class="wrap layout">
+<nav class="side" aria-label="Contents">
+  <ol>
+    <li class="grp">Start here</li>
+    <li><a href="#eli5">ELI5</a></li>
+    <li><a href="#purpose">Task &amp; purpose</a></li>
+    <li><a href="#overview">General overview</a></li>
+    <li class="grp">Deep dives</li>
+    <li><a href="#containers">1. Containers</a></li>
+    <li><a href="#databases">2. Redis databases</a></li>
+    <li><a href="#route">3. Life of a route</a></li>
+    <li><a href="#orch">4. orchagent, syncd &amp; SAI</a></li>
+    <li><a href="#config">5. Config &amp; management</a></li>
+    <li><a href="#platform">6. Platform &amp; hardware</a></li>
+    <li><a href="#reliability">7. Reliability &amp; upgrades</a></li>
+    <li><a href="#scale">8. Scaling out</a></li>
+    <li><a href="#observe">9. Observability</a></li>
+    <li><a href="#ha">10. High availability</a></li>
+    <li><a href="#security">11. Security</a></li>
+    <li><a href="#build">12. Build &amp; extensibility</a></li>
+    <li><a href="#frontier">13. New frontiers</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ELI5 -->
+<section id="eli5">
+  <span class="kicker">Explain like I'm 5</span>
+  <h2>What is SONiC?</h2>
+  <div class="eli5">
+    <p>Imagine a huge post office with thousands of mail slots. Letters (data packets) arrive all the time, and a very fast machine decides which slot each letter goes into. That machine is the <strong>switch chip</strong>. It is extremely fast, but it cannot think. It only follows a list of rules.</p>
+    <p>Someone has to <em>write</em> those rules, keep them up to date when roads close, and check that everything is healthy. That someone is the switch's <strong>operating system</strong>. For years, every brand of chip came with its own operating system, and it was locked shut.</p>
+    <p><strong>SONiC is a free, open operating system that can drive switch chips from many different brands.</strong> Inside it, a team of small helpers each have one job. One learns routes from neighbours, one watches the fans, one counts packets. They never talk to each other directly. Instead they write notes on one big shared whiteboard (a database). A translator reads the whiteboard and turns the notes into rules the chip understands.</p>
+    <dl class="analogy">
+      <dt>Post office sorter</dt><dd>The switch ASIC, the chip that forwards packets</dd>
+      <dt>Helpers</dt><dd>Docker containers: bgp, teamd, lldp, pmon, snmp…</dd>
+      <dt>Shared whiteboard</dt><dd>Redis databases (CONFIG_DB, APPL_DB, ASIC_DB, …)</dd>
+      <dt>Translator</dt><dd>orchagent + syncd, speaking SAI to the chip</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- PURPOSE -->
+<section id="purpose">
+  <h2>Task &amp; purpose</h2>
+  <p class="lede">SONiC stands for Software for Open Networking in the Cloud. Microsoft created it to run the Azure data-center network and released it as open source in 2016. It is now governed by the SONiC Foundation under the Linux Foundation.</p>
+  <div class="grid">
+    <div class="card"><h4>The problem</h4><p>Cloud operators run tens of thousands of switches. With a closed vendor OS, every bug fix waits on the vendor, every feature waits on the vendor's roadmap, and every vendor needs its own tools.</p></div>
+    <div class="card"><h4>The job</h4><p>SONiC does three things. It runs the control plane (BGP, LACP, LLDP…). It turns what the control plane decides into hardware forwarding tables. And it exposes the switch to automation through CLI, gNMI, REST and telemetry.</p></div>
+    <div class="card"><h4>The key idea</h4><p><strong>Disaggregation.</strong> Hardware and software are chosen separately. The <a href="#orch">SAI</a> layer lets one software stack run on many ASICs.</p></div>
+    <div class="card"><h4>Design priorities</h4><p>Simple, focused features for the cloud (mostly BGP-based L3 Clos fabrics). Upgrades without dropping traffic. Everything automatable. Standard Linux and Debian underneath.</p></div>
+  </div>
+  <p class="reads">Repo context: <a href="https://github.com/sonic-net/SONiC/blob/master/README.md">README.md</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/governance.md">governance.md</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/sourcecode.md">sourcecode.md</a> (map of the sonic-net repositories)</p>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <h2>General overview</h2>
+  <p class="lede">SONiC is a Debian Linux image. Most of its features run as Docker containers, and the containers coordinate through a Redis database container. The layered view below is the single most useful thing to memorize.</p>
+  <div class="diagram" role="img" aria-label="SONiC layers: management interfaces on top, feature containers, the Redis database layer, orchagent and syncd, SAI, and the ASIC at the bottom.">
+    <svg viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg">
+      <rect class="s-band" x="10" y="10" width="880" height="56" rx="8"/>
+      <text class="s-band-t" x="24" y="30">MANAGEMENT</text>
+      <text class="s-t-b" x="24" y="52">CLI (click)  ·  gNMI / gNOI telemetry  ·  REST / mgmt-framework  ·  SNMP  ·  ZTP</text>
+
+      <rect class="s-band" x="10" y="76" width="880" height="80" rx="8"/>
+      <text class="s-band-t" x="24" y="96">FEATURE CONTAINERS (CONTROL PLANE)</text>
+      <g>
+        <rect class="s-box" x="24" y="106" width="100" height="38" rx="6"/><text class="s-t-b" x="74" y="130" text-anchor="middle">bgp (FRR)</text>
+        <rect class="s-box" x="134" y="106" width="100" height="38" rx="6"/><text class="s-t-b" x="184" y="130" text-anchor="middle">teamd</text>
+        <rect class="s-box" x="244" y="106" width="100" height="38" rx="6"/><text class="s-t-b" x="294" y="130" text-anchor="middle">lldp</text>
+        <rect class="s-box" x="354" y="106" width="100" height="38" rx="6"/><text class="s-t-b" x="404" y="130" text-anchor="middle">pmon</text>
+        <rect class="s-box" x="464" y="106" width="100" height="38" rx="6"/><text class="s-t-b" x="514" y="130" text-anchor="middle">snmp</text>
+        <rect class="s-box" x="574" y="106" width="100" height="38" rx="6"/><text class="s-t-b" x="624" y="130" text-anchor="middle">dhcp_relay</text>
+        <rect class="s-box" x="684" y="106" width="100" height="38" rx="6"/><text class="s-t-b" x="734" y="130" text-anchor="middle">gnmi</text>
+        <text class="s-m" x="800" y="130">…</text>
+      </g>
+
+      <rect class="s-band" x="10" y="166" width="880" height="64" rx="8"/>
+      <text class="s-band-t" x="24" y="186">DATABASE CONTAINER (REDIS)</text>
+      <rect class="s-db" x="24" y="194" width="130" height="28" rx="5"/><text class="s-t-b" x="89" y="213" text-anchor="middle">CONFIG_DB</text>
+      <rect class="s-db" x="164" y="194" width="130" height="28" rx="5"/><text class="s-t-b" x="229" y="213" text-anchor="middle">APPL_DB</text>
+      <rect class="s-db" x="304" y="194" width="130" height="28" rx="5"/><text class="s-t-b" x="369" y="213" text-anchor="middle">ASIC_DB</text>
+      <rect class="s-db" x="444" y="194" width="130" height="28" rx="5"/><text class="s-t-b" x="509" y="213" text-anchor="middle">STATE_DB</text>
+      <rect class="s-db" x="584" y="194" width="140" height="28" rx="5"/><text class="s-t-b" x="654" y="213" text-anchor="middle">COUNTERS_DB</text>
+      <text class="s-m" x="740" y="213">+ FLEX_COUNTER_DB…</text>
+
+      <rect class="s-band" x="10" y="240" width="880" height="56" rx="8"/>
+      <text class="s-band-t" x="24" y="260">SWITCH STATE SERVICE + SYNC</text>
+      <text class="s-t-b" x="24" y="283">swss: *mgrd · *syncd · orchagent     →     syncd container: sairedis → SAI</text>
+
+      <rect class="s-band" x="10" y="306" width="880" height="36" rx="8"/>
+      <text class="s-band-t" x="24" y="329">SAI (VENDOR LIBRARY)  ·  VENDOR SDK  ·  LINUX KERNEL + DRIVERS</text>
+
+      <rect class="s-band-hw" x="10" y="352" width="880" height="38" rx="8"/>
+      <text class="s-t-b" x="450" y="376" text-anchor="middle">Switch ASIC hardware (Broadcom, NVIDIA, Marvell, Cisco, Intel/Barefoot…)</text>
+    </svg>
+  </div>
+  <div class="grid">
+    <div class="card"><h4>Containers do the work</h4><p>Each feature is isolated, so it can be restarted, upgraded or turned off on its own.</p></div>
+    <div class="card"><h4>The database is the bus</h4><p>All communication goes through Redis tables using a producer/consumer pattern, plus keyspace notifications.</p></div>
+    <div class="card"><h4>Intent flows down</h4><p>The chain is CONFIG_DB → APPL_DB → ASIC_DB → hardware. Each step translates to a lower-level language.</p></div>
+    <div class="card"><h4>State flows up</h4><p>Counters, link states and health go into COUNTERS_DB and STATE_DB, where the CLI, SNMP and telemetry read them.</p></div>
+  </div>
+</section>
+
+<!-- 1 CONTAINERS -->
+<section id="containers">
+  <span class="kicker">Deep dive 1</span>
+  <h2>The container model</h2>
+  <p class="lede">Running each feature in a container provides fault isolation, independent restarts, and an easy way to ship third-party features. systemd manages the containers. Inside each one, supervisord manages the processes.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Container</th><th>Role</th><th>Key processes</th></tr></thead>
+    <tbody>
+      <tr><td><code>database</code></td><td>Hosts the Redis server(s). Every other container depends on it.</td><td>redis-server</td></tr>
+      <tr><td><code>swss</code></td><td>Switch State Service. Turns intent into SAI objects.</td><td>orchagent, portsyncd, neighsyncd, vlanmgrd, intfmgrd, portmgrd…</td></tr>
+      <tr><td><code>syncd</code></td><td>The only process that talks to the vendor SAI and SDK.</td><td>syncd (links the vendor libsai)</td></tr>
+      <tr><td><code>bgp</code></td><td>Routing stack.</td><td>FRR: bgpd, zebra, staticd; fpmsyncd; bgpcfgd</td></tr>
+      <tr><td><code>teamd</code></td><td>Link aggregation (LACP).</td><td>teamd, teamsyncd, teammgrd</td></tr>
+      <tr><td><code>pmon</code></td><td>Platform monitoring: fans, PSUs, thermals, transceivers.</td><td>xcvrd, psud, thermalctld, ledd, syseepromd</td></tr>
+      <tr><td><code>lldp</code>, <code>snmp</code>, <code>dhcp_relay</code>, <code>radv</code></td><td>Protocol and management features.</td><td>lldpd, lldp_syncd, snmpd + agent…</td></tr>
+      <tr><td><code>gnmi</code> / <code>telemetry</code>, <code>mgmt-framework</code></td><td>Northbound programmatic management.</td><td>gNMI server, REST server, translib</td></tr>
+    </tbody>
+  </table></div>
+  <div class="sd"><strong>System-design link:</strong> microservices, fault isolation, bulkheads. A crash in <code>lldp</code> does not bring down forwarding.</div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/Container%20Hardening/SONiC_container_hardening_HLD.md">Container hardening</a> · <a href="https://github.com/sonic-net/SONiC/tree/master/doc/optional-feature-control">Optional feature control</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/mgmt/Docker%20to%20Host%20communication.md">Docker-to-host communication</a></p>
+</section>
+
+<!-- 2 DATABASES -->
+<section id="databases">
+  <span class="kicker">Deep dive 2</span>
+  <h2>The Redis databases</h2>
+  <p class="lede">SONiC keeps its state in several logical Redis databases, one per kind of state. The mapping is defined in <code>database_config.json</code>. By default all of them share one Redis instance, but they can be split across several instances.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>DB (id)</th><th>Holds</th><th>Written by → Read by</th><th>Key separator</th></tr></thead>
+    <tbody>
+      <tr><td><code>APPL_DB</code> (0)</td><td>Application intent: routes, neighbors, port state</td><td>*syncd / *mgrd daemons → orchagent</td><td><code>:</code></td></tr>
+      <tr><td><code>ASIC_DB</code> (1)</td><td>SAI objects and attributes to program</td><td>orchagent (via sairedis) → syncd</td><td><code>:</code></td></tr>
+      <tr><td><code>COUNTERS_DB</code> (2)</td><td>Port, queue and ACL statistics</td><td>syncd flex-counter → CLI, SNMP, telemetry</td><td><code>:</code></td></tr>
+      <tr><td><code>LOGLEVEL_DB</code> (3)</td><td>Per-daemon log levels</td><td>CLI → daemons</td><td><code>:</code></td></tr>
+      <tr><td><code>CONFIG_DB</code> (4)</td><td>Persistent configuration (the source of truth)</td><td>CLI, gNMI, config load → *mgrd, orchagent</td><td><code>|</code></td></tr>
+      <tr><td><code>FLEX_COUNTER_DB</code> (5)</td><td>Which counters to poll, and how often</td><td>orchagent → syncd</td><td><code>:</code></td></tr>
+      <tr><td><code>STATE_DB</code> (6)</td><td>Observed runtime state: oper status, transceiver info, features</td><td>many → many</td><td><code>|</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>Example keys: <code>CONFIG_DB: VLAN|Vlan100</code>, <code>APPL_DB: ROUTE_TABLE:10.0.0.0/24</code>, <code>ASIC_DB: ASIC_STATE:SAI_OBJECT_TYPE_ROUTE_ENTRY:{…}</code>. <code>/etc/sonic/config_db.json</code> is a persisted snapshot of CONFIG_DB, loaded at boot.</p>
+  <h3>How producers and consumers communicate</h3>
+  <p>The <code>sonic-swss-common</code> library provides <code>ProducerStateTable</code> and <code>ConsumerStateTable</code>. A producer writes the key into a temporary table, adds the key to a "pending keys" set, and publishes a notification, all atomically in a Lua script. The consumer wakes up, pops a batch of keys, and applies them. Because the pending-keys set holds each key once, repeated updates to the same key before the consumer runs <em>coalesce</em> into one. This is built-in de-duplication.</p>
+  <div class="callout warn"><strong>Known bottleneck:</strong> one Redis instance under a storm of route writes. The fixes are to split databases across instances (reported 20–30% faster) or to use ZMQ in place of Redis on hot paths.</div>
+  <div class="sd"><strong>System-design link:</strong> key-value store, pub/sub, the message queue as a buffer, write coalescing, sharding by function.</div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/database/multi_database_instances.md">Multiple DB instances</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/database/multi_namespace_db_instances.md">Multi-namespace DB</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-swss-common/ZMQ%20producer-consumer%20state%20table%20design.md">ZMQ state tables</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/configuration/examples/config_db.json">example config_db.json</a></p>
+</section>
+
+<!-- 3 ROUTE -->
+<section id="route">
+  <span class="kicker">Deep dive 3</span>
+  <h2>Life of a route</h2>
+  <p class="lede">Following one BGP route from the wire to the chip shows almost every design idea in SONiC.</p>
+  <div class="diagram" role="img" aria-label="Route flow: bgpd to zebra to fpmsyncd to APPL_DB to orchagent to ASIC_DB to syncd to SAI to ASIC.">
+    <svg viewBox="0 0 960 150" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="s-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <rect class="s-box" x="10" y="45" width="90" height="50" rx="8"/><text class="s-t-b" x="55" y="68" text-anchor="middle">bgpd</text><text class="s-m" x="55" y="84" text-anchor="middle">learns route</text>
+      <rect class="s-box" x="130" y="45" width="90" height="50" rx="8"/><text class="s-t-b" x="175" y="68" text-anchor="middle">zebra</text><text class="s-m" x="175" y="84" text-anchor="middle">RIB → FIB</text>
+      <rect class="s-box" x="250" y="45" width="100" height="50" rx="8"/><text class="s-t-b" x="300" y="68" text-anchor="middle">fpmsyncd</text><text class="s-m" x="300" y="84" text-anchor="middle">FPM socket</text>
+      <rect class="s-db" x="380" y="45" width="100" height="50" rx="8"/><text class="s-t-b" x="430" y="68" text-anchor="middle">APPL_DB</text><text class="s-m" x="430" y="84" text-anchor="middle">ROUTE_TABLE</text>
+      <rect class="s-box" x="510" y="45" width="100" height="50" rx="8"/><text class="s-t-b" x="560" y="68" text-anchor="middle">orchagent</text><text class="s-m" x="560" y="84" text-anchor="middle">RouteOrch</text>
+      <rect class="s-db" x="640" y="45" width="100" height="50" rx="8"/><text class="s-t-b" x="690" y="68" text-anchor="middle">ASIC_DB</text><text class="s-m" x="690" y="84" text-anchor="middle">SAI objects</text>
+      <rect class="s-box" x="770" y="45" width="80" height="50" rx="8"/><text class="s-t-b" x="810" y="68" text-anchor="middle">syncd</text><text class="s-m" x="810" y="84" text-anchor="middle">libsai</text>
+      <rect class="s-hw" x="875" y="45" width="75" height="50" rx="8"/><text class="s-t-b" x="912" y="75" text-anchor="middle">ASIC</text>
+      <path class="s-line" d="M100 70 H128" marker-end="url(#ah)"/><path class="s-line" d="M220 70 H248" marker-end="url(#ah)"/>
+      <path class="s-line" d="M350 70 H378" marker-end="url(#ah)"/><path class="s-line" d="M480 70 H508" marker-end="url(#ah)"/>
+      <path class="s-line" d="M610 70 H638" marker-end="url(#ah)"/><path class="s-line" d="M740 70 H768" marker-end="url(#ah)"/>
+      <path class="s-line" d="M850 70 H873" marker-end="url(#ah)"/>
+      <text class="s-m" x="300" y="122" text-anchor="middle">Redis pipeline (batched)</text>
+      <text class="s-m" x="560" y="122" text-anchor="middle">resolve next hops, groups</text>
+      <text class="s-m" x="810" y="122" text-anchor="middle">VID → RID mapping</text>
+    </svg>
+  </div>
+  <ol class="steps">
+    <li><strong>bgpd</strong> receives an UPDATE from a peer, runs best-path selection, and hands the route to <strong>zebra</strong>.</li>
+    <li><strong>zebra</strong> installs the route in the kernel and sends it to <strong>fpmsyncd</strong> over the Forwarding Plane Manager (FPM) channel.</li>
+    <li><strong>fpmsyncd</strong> writes <code>ROUTE_TABLE:&lt;prefix&gt;</code> into APPL_DB. It queues writes in a Redis pipeline and flushes them in batches.</li>
+    <li><strong>orchagent</strong> (RouteOrch) consumes the change. It resolves next hops (NeighOrch), builds or reuses ECMP next-hop groups, checks resources, and creates SAI route objects.</li>
+    <li><strong>sairedis</strong> serializes those SAI calls into ASIC_DB. By default this is asynchronous; in synchronous mode orchagent waits for the result.</li>
+    <li><strong>syncd</strong> reads ASIC_DB, translates virtual object IDs (VIDs) to real hardware IDs (RIDs), and calls the vendor SAI, which programs the ASIC.</li>
+    <li>Optionally, the result is reported back so that BGP only advertises routes that are actually installed in hardware ("suppress FIB pending").</li>
+  </ol>
+  <div class="sd"><strong>System-design link:</strong> a multi-stage asynchronous pipeline. The questions it raises are about back-pressure, where to batch, the latency/throughput trade-off, and when to acknowledge.</div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bgp_loading_optimization/bgp-loading-optimization-hld.md">BGP loading optimization</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-fpm-module/frr_sonic_communication_channel.md">FRR↔SONiC channel</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/BGP/BGP-supress-fib-pending.md">Suppress FIB pending</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/orchagent/orchagent_route_redesign.md">Orchagent route redesign</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/route-performance/README.md">Route performance</a></p>
+</section>
+
+<!-- 4 ORCH -->
+<section id="orch">
+  <span class="kicker">Deep dive 4</span>
+  <h2>orchagent, syncd &amp; SAI</h2>
+  <div class="grid">
+    <div class="card"><h4>orchagent</h4><p>A single-threaded event loop (<code>select()</code> over many consumer tables). It is organized into "Orch" modules such as PortsOrch, RouteOrch, NeighOrch, AclOrch and VxlanOrch. Tasks that cannot run yet, for example a route whose next hop has not been resolved, stay in a queue and are retried later. The modules depend on each other, so the order in which work is handled matters.</p></div>
+    <div class="card"><h4>syncd</h4><p>Owns the vendor SDK process. It keeps the VID↔RID mapping, so the software above uses stable virtual IDs while hardware IDs can change across restarts. It also runs flex-counter polling and forwards hardware notifications, such as port state changes and FDB events, back up to orchagent.</p></div>
+    <div class="card"><h4>SAI</h4><p>The Switch Abstraction Interface, an OCP-standard C API (create/remove/set/get for object types like ROUTE_ENTRY and NEXT_HOP_GROUP). Each vendor ships its own <code>libsai</code>. It is an adapter pattern at industry scale.</p></div>
+  </div>
+  <h3>Failure handling</h3>
+  <p>What happens if the hardware rejects a request, for example because a table is full? The design docs cover several options: retry, report the error back up through APPL_DB/STATE_DB, take a SAI dump for debugging, and mark the component as unhealthy.</p>
+  <div class="sd"><strong>System-design link:</strong> the adapter pattern, a stable ID layer over unstable physical IDs, error propagation in async systems, sync vs async acknowledgments.</div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/SAI_failure_handling/SAI_failure_handling.md">SAI failure handling</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/SAI_failure_handling/dump_on_sai_failure.md">Dump on SAI failure</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/error-handling/orchagent_error_handling.md">Orchagent error handling</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/synchronous-mode/synchronous-mode-cfg.md">Synchronous mode</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/orchagent/notification_queue_policy_hld.md">Notification queue policy</a></p>
+</section>
+
+<!-- 5 CONFIG -->
+<section id="config">
+  <span class="kicker">Deep dive 5</span>
+  <h2>Configuration &amp; management</h2>
+  <p class="lede">All configuration ends up in CONFIG_DB. The management interfaces are simply different ways of writing to it.</p>
+  <div class="grid">
+    <div class="card"><h4>CLI</h4><p>A Python <code>click</code> CLI (<code>config …</code>, <code>show …</code>). <code>config save</code> persists CONFIG_DB to <code>config_db.json</code>. <code>config reload</code> reapplies it from disk.</p></div>
+    <div class="card"><h4>YANG models</h4><p>SONiC YANG models define the schema of CONFIG_DB. They validate changes before they are written.</p></div>
+    <div class="card"><h4>Generic Config Update (GCU)</h4><p>Applies JSON Patch changes to the running config. The patch is split into steps and ordered by YANG dependencies. Checkpoints allow rollback.</p></div>
+    <div class="card"><h4>gNMI / gNOI / REST</h4><p>Programmatic management and streaming telemetry. The mgmt-framework translates OpenConfig models into SONiC tables.</p></div>
+    <div class="card"><h4>ZTP</h4><p>Zero-Touch Provisioning: a new switch boots, fetches its config and image over DHCP/HTTP, and sets itself up.</p></div>
+    <div class="card"><h4>Golden config</h4><p>A single JSON file that describes the whole desired config, even on multi-ASIC systems.</p></div>
+  </div>
+  <div class="sd"><strong>System-design link:</strong> schema validation at the edge, declarative desired state, versioning and rollback, idempotent apply.</div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/config-generic-update-rollback/SONiC_Generic_Config_Update_and_Rollback_Design.md">GCU &amp; rollback</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/config-generic-update-rollback/Json_Patch_Ordering_using_YANG_Models_Design.md">JSON Patch ordering</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/config_yang_validation/config_db_yang_validation.md">YANG validation</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/mgmt/Management%20Framework.md">Management Framework</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/mgmt/SONiC_YANG_Model_Guidelines.md">YANG guidelines</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/ztp/ztp.md">ZTP</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/golden_config/Multi-Asic_Single_JSON_Configuration_Design.md">Golden config</a></p>
+</section>
+
+<!-- 6 PLATFORM -->
+<section id="platform">
+  <span class="kicker">Deep dive 6</span>
+  <h2>Platform &amp; hardware</h2>
+  <p class="lede">Besides the ASIC, a switch has fans, power supplies, sensors, transceivers (optics) and LEDs. The <code>pmon</code> container watches them through a vendor-implemented Python <em>platform API</em>.</p>
+  <div class="grid">
+    <div class="card"><h4>Transceivers</h4><p><code>xcvrd</code> detects plug and unplug events, reads EEPROM and diagnostic data (CMIS/SFF), and applies media-specific settings.</p></div>
+    <div class="card"><h4>Thermal &amp; power</h4><p><code>thermalctld</code> and <code>psud</code> run policy-driven fan control and PSU monitoring. <code>system-health</code> combines all of it into one status.</p></div>
+    <div class="card"><h4>Firmware</h4><p><code>fwutil</code> handles component firmware upgrades (BIOS, CPLD, FPGA).</p></div>
+  </div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/pmon/pmon-enhancement-design.md">pmon enhancement</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/xrcvd/transceiver-monitor-hld.md">Transceiver monitor</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/media-settings/Media-based-Port-settings.md">Media settings</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/system_health_monitoring/system-health-HLD.md">System health</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/platform_api/CMIS_Diagnostic_Monitoring_Overview_in_SONiC.md">CMIS diagnostics</a></p>
+</section>
+
+<!-- 7 RELIABILITY -->
+<section id="reliability">
+  <span class="kicker">Deep dive 7</span>
+  <h2>Reliability &amp; hitless upgrades</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Mode</th><th>Data plane impact</th><th>How it works</th></tr></thead>
+    <tbody>
+      <tr><td>Cold reboot</td><td>Minutes of outage</td><td>Full restart. The ASIC is reinitialized.</td></tr>
+      <tr><td>Fast reboot</td><td>Under ~30 s outage</td><td>Kexec into the new image while preserving key state such as ARP, FDB and CoPP tables. The ASIC is still reset.</td></tr>
+      <tr><td>Warm reboot / warm restart</td><td>Target: no packet loss</td><td>The ASIC keeps forwarding while the software restarts. State is saved, restored, reconciled, and only the differences are applied.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Warm restart, step by step</h3>
+  <ol class="steps">
+    <li><strong>Freeze.</strong> Stop processing new changes and let pending tasks drain.</li>
+    <li><strong>Save.</strong> Save the Redis databases and the protocol state. BGP graceful restart asks peers to keep forwarding, and LACP timeouts are extended.</li>
+    <li><strong>Restart.</strong> The new container or image starts, and APPL_DB and ASIC_DB are restored.</li>
+    <li><strong>Reconcile.</strong> orchagent rebuilds its internal state from APPL_DB. syncd compares the old and new "views" of ASIC_DB and applies only the diff. SAI calls must be <em>idempotent</em>.</li>
+    <li><strong>Converge.</strong> Protocols resync with peers, and stale entries are cleaned up once timers expire.</li>
+  </ol>
+  <div class="sd"><strong>System-design link:</strong> zero-downtime deploys, separating the data plane from the control plane, snapshots plus reconciliation, idempotent replays, graceful degradation.</div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/SONiC_Warmboot.md">SONiC Warmboot</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/swss_warm_restart.md">SWSS warm restart</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/view_switch.md">View switch</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/sai_redis_api_idempotence.md">SAI idempotence</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/fast-reboot/Fast-reboot_Flow_Improvements_HLD.md">Fast reboot</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/lag/Increasing%20LACP%20PDU%20timeout%20during%20warm-reboot.md">LACP during warm reboot</a></p>
+</section>
+
+<!-- 8 SCALE -->
+<section id="scale">
+  <span class="kicker">Deep dive 8</span>
+  <h2>Scaling out: multi-ASIC, chassis &amp; VOQ</h2>
+  <div class="grid">
+    <div class="card"><h4>Multi-ASIC</h4><p>One box contains several ASICs. Each ASIC gets its own Linux network namespace with its own <code>database</code>, <code>swss</code>, <code>syncd</code>, <code>bgp</code> and <code>teamd</code>. A global host namespace handles management. This is partitioning by physical resource.</p></div>
+    <div class="card"><h4>Chassis</h4><p>A modular chassis with a supervisor card and line cards. Each line card runs its own SONiC. Shared state is kept in a chassis-level database on the supervisor.</p></div>
+    <div class="card"><h4>VOQ</h4><p>Virtual Output Queues schedule traffic across the fabric. A distributed forwarding design needs a global view of neighbors and interfaces system-wide.</p></div>
+  </div>
+  <div class="sd"><strong>System-design link:</strong> horizontal scaling, sharding, global vs local state, a control-plane coordinator.</div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/multi_asic/SONiC_multi_asic_hld.md">Multi-ASIC HLD</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/multi_asic/DB_Design_for_multi_asic.md">Multi-ASIC DB</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/voq/architecture.md">VOQ architecture</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/voq/voq_hld.md">VOQ HLD</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/chassis/module-provisioning/chassis-linecard-provisioning-hld.md">Line card provisioning</a></p>
+</section>
+
+<!-- 9 OBSERVE -->
+<section id="observe">
+  <span class="kicker">Deep dive 9</span>
+  <h2>Observability</h2>
+  <div class="grid">
+    <div class="card"><h4>Counters</h4><p><em>Flex counters</em>: orchagent registers counter groups in FLEX_COUNTER_DB, and syncd polls them from hardware into COUNTERS_DB at a configurable interval.</p></div>
+    <div class="card"><h4>Streaming telemetry</h4><p>A gNMI server supports subscribe (dial-in) and dial-out. <em>High-frequency telemetry</em> pushes sub-second samples straight from the ASIC.</p></div>
+    <div class="card"><h4>Resources</h4><p>CRM tracks used and available entries in each hardware table and raises threshold alarms.</p></div>
+    <div class="card"><h4>Events &amp; logs</h4><p>Syslog with rate limiting. A structured, YANG-described event/alarm framework. Auto-techsupport and kdump capture evidence when something crashes.</p></div>
+    <div class="card"><h4>Packet visibility</h4><p>sFlow sampling, Everflow (mirroring driven by ACLs), drop counters, and watermarks.</p></div>
+  </div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/flex_counter/flex_counter_refactor.md">Flex counter</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/system-telemetry/grpc_telemetry.md">gRPC telemetry</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/high-frequency-telemetry/high-frequency-telemetry-hld.md">HFT</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/crm/Critical-Resource-Monitoring-High-Level-Design.md">CRM</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/event-alarm-framework/event-alarm-framework.md">Event/alarm</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/auto-techsupport/auto_techsupport_and_coredump_mgmt.md">Auto-techsupport</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sflow/sflow_hld.md">sFlow</a></p>
+</section>
+
+<!-- 10 HA -->
+<section id="ha">
+  <span class="kicker">Deep dive 10</span>
+  <h2>High availability</h2>
+  <div class="grid">
+    <div class="card"><h4>ECMP</h4><p>The simplest form of HA in a Clos fabric: many equal-cost paths. Fine-grained and consistent hashing reduce how many flows move when a path fails.</p></div>
+    <div class="card"><h4>Dual ToR</h4><p>A server connects to two top-of-rack switches through a mux cable. The design comes in active/standby and active/active variants, with health probing and switchover.</p></div>
+    <div class="card"><h4>MCLAG</h4><p>Two switches act as one LAG endpoint. They sync state with ICCP (<code>iccpd</code>).</p></div>
+    <div class="card"><h4>SmartSwitch HA</h4><p>DPU pairs with a dedicated HA manager (<code>hamgrd</code>). The design covers flow-state sync, liveness through BFD, and split-brain handling.</p></div>
+  </div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/ecmp/fine_grained_next_hop_hld.md">Fine-grained ECMP</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/dualtor/dualtor_active_standby_hld.md">Dual ToR A/S</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/dualtor/active_active_hld.md">Dual ToR A/A</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/mclag/Sonic-mclag-hld.md">MCLAG</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/high-availability/smart-switch-ha-hld.md">SmartSwitch HA</a></p>
+</section>
+
+<!-- 11 SECURITY -->
+<section id="security">
+  <span class="kicker">Deep dive 11</span>
+  <h2>Security</h2>
+  <div class="grid">
+    <div class="card"><h4>Control-plane protection</h4><p>CoPP applies per-trap-group policers so that packet floods cannot overwhelm the CPU. Storm control limits broadcast, unknown-unicast and multicast traffic.</p></div>
+    <div class="card"><h4>Access</h4><p>AAA with TACACS+ and RADIUS, password hardening, and SSH configuration.</p></div>
+    <div class="card"><h4>Supply chain</h4><p>Secure boot, signed images (secure upgrade), and FIPS-validated crypto.</p></div>
+    <div class="card"><h4>Least privilege</h4><p>Container hardening removes <code>--privileged</code> and unneeded capabilities from containers.</p></div>
+  </div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/copp/CoPP%20Config%20and%20Management.md">CoPP</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bum_storm_control/bum_storm_control_hld.md">Storm control</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/aaa/TACACS+%20Authentication.md">TACACS+</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/secure_upgrade/secure_upgrade.md">Secure upgrade</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/Container%20Hardening/SONiC_container_hardening_HLD.md">Container hardening</a></p>
+</section>
+
+<!-- 12 BUILD -->
+<section id="build">
+  <span class="kicker">Deep dive 12</span>
+  <h2>Build &amp; extensibility</h2>
+  <p>The <code>sonic-buildimage</code> repository builds one image per ASIC vendor (<code>sonic-broadcom.bin</code>, <code>sonic-mellanox.bin</code>, <code>sonic-vs.img</code> for the virtual switch, and others). Builds are containerized, cached and reproducible. The Application Extension framework turns SONiC into a platform for third-party features: a package manager for Docker images, with manifests, dependencies and versioning.</p>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-build-system/SONiC-Reproduceable-Build.md">Reproducible build</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-build-system/build-enhancements.md">Build enhancements</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-application-extension/sonic-application-extention-hld.md">App extension HLD</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-application-extension/sonic-versioning-strategy.md">Versioning strategy</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/kubernetes/Kubernetes-support.md">Kubernetes support</a></p>
+</section>
+
+<!-- 13 FRONTIER -->
+<section id="frontier">
+  <span class="kicker">Deep dive 13</span>
+  <h2>New frontiers</h2>
+  <div class="grid">
+    <div class="card"><h4>DASH &amp; SmartSwitch</h4><p>Disaggregated API for SONiC Hosts. It offloads SDN services (VNET, ACLs, load balancing) onto DPUs, with millions of connection flows per card.</p></div>
+    <div class="card"><h4>PINS</h4><p>P4 Integrated Network Stack. An SDN controller programs the switch through P4Runtime, while SAI stays underneath.</p></div>
+    <div class="card"><h4>AI fabrics</h4><p>Ethernet scale-up for AI clusters, adaptive routing (ARS), packet trimming, and link-level retry.</p></div>
+  </div>
+  <p class="reads">Read: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md">DASH HLD</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/pins/pins_hld.md">PINS HLD</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/scale_up/Ethernet_Scale_Up_AI_Cluster_Architecture.md">AI scale-up</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/ARS/Local_ARS_HLD.md">Adaptive routing</a></p>
+</section>
+
+<!-- GLOSSARY -->
+<section id="glossary">
+  <h2>Glossary</h2>
+  <div class="table-wrap"><table>
+    <tbody>
+      <tr><th>ASIC</th><td>The switching chip that forwards packets in hardware at terabits per second.</td></tr>
+      <tr><th>SAI</th><td>Switch Abstraction Interface: a vendor-neutral C API for programming ASICs.</td></tr>
+      <tr><th>SWSS</th><td>Switch State Service: the container holding orchagent and the *syncd/*mgrd daemons.</td></tr>
+      <tr><th>orchagent</th><td>Translates APPL_DB and CONFIG_DB intent into SAI objects in ASIC_DB.</td></tr>
+      <tr><th>syncd</th><td>Applies ASIC_DB to the hardware through the vendor SAI. Polls counters.</td></tr>
+      <tr><th>VID / RID</th><td>Virtual object ID (stable, used in software) and real object ID (from hardware).</td></tr>
+      <tr><th>FPM</th><td>Forwarding Plane Manager: the channel that carries routes from zebra to fpmsyncd.</td></tr>
+      <tr><th>ECMP</th><td>Equal-Cost Multi-Path: spreads flows across several next hops by hashing.</td></tr>
+      <tr><th>CoPP</th><td>Control Plane Policing: rate limits for traffic sent to the CPU.</td></tr>
+      <tr><th>CRM</th><td>Critical Resource Monitoring: tracks hardware table usage.</td></tr>
+      <tr><th>ToR / Clos</th><td>Top-of-Rack switch / a multi-stage leaf-spine data-center topology.</td></tr>
+      <tr><th>gNMI / gNOI</th><td>gRPC Network Management / Operations Interface.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="reads">Full doc index: <a href="https://github.com/sonic-net/SONiC/blob/master/sonic_docs_toc.md">sonic_docs_toc.md</a> · <a href="https://github.com/sonic-net/SONiC/tree/master/doc">doc/ folder</a></p>
+</section>
+
+</main>
+</div>
+
+<footer><div class="wrap">Next: <a href="System_Design_QA.html">System Design Q&amp;A →</a> · Design-doc links open <a href="https://github.com/sonic-net/SONiC">sonic-net/SONiC</a> on GitHub.</div></footer>
+
+<button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle color theme">Toggle theme</button>
+<script>
+(function(){
+  var K='about-sonic-theme';
+  try{var t=localStorage.getItem(K); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){}
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var c=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    var n=c==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',n);
+    try{localStorage.setItem(K,n)}catch(e){}
+  });
+})();
+</script>
+</body>
+</html>

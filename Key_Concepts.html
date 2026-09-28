@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Key Concepts by Chapter</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f3f1ec; --text:#1d1c1a; --muted:#5f5b53;
+  --border:#e2ded5; --accent:#2f5d8a; --accent-soft:#e6eef6; --ok:#2d7a4b; --ok-soft:#e5f2ea;
+  --code-bg:#f1efe9; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+    --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ok:#7cc79a; --ok-soft:#1f3328;
+    --code-bg:#2a2925; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+  --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ok:#7cc79a; --ok-soft:#1f3328;
+  --code-bg:#2a2925; --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.87em;background:var(--code-bg);padding:.1em .35em;border-radius:4px;word-break:break-word}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.topbar{border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar .wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;font-size:.92rem}
+.topbar a{text-decoration:none;color:var(--muted)}
+.topbar a.active{color:var(--text);font-weight:600}
+.topbar .brand{font-weight:700;color:var(--text);margin-right:auto;text-decoration:none}
+header{padding:44px 0 18px}
+header h1{font-size:clamp(1.8rem,4vw,2.5rem);line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+header p{color:var(--muted);margin:0;max-width:72ch}
+.kicker{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.toolbar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 0}
+.toolbar .wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.toolbar input[type=search]{flex:1 1 240px;min-width:0;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font:inherit}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:8px 12px;font:inherit;font-size:.9rem;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.count{font-size:.85rem;color:var(--muted)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;align-items:start;padding-top:20px}
+nav.side{position:sticky;top:70px;font-size:.86rem;border-left:2px solid var(--border);padding-left:14px;max-height:calc(100vh - 90px);overflow:auto}
+nav.side ol{list-style:none;margin:0;padding:0}
+nav.side li{margin:2px 0}
+nav.side a{text-decoration:none;color:var(--muted)}
+nav.side a:hover{color:var(--accent)}
+nav.side .grp{font-weight:600;color:var(--text);margin-top:12px;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+@media (max-width:820px){.layout{grid-template-columns:1fr}nav.side{position:static;border-left:none;padding-left:0;max-height:none}}
+.vol{font-size:1.6rem;margin:6px 0 10px}
+.chap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:0 0 16px;box-shadow:var(--shadow)}
+.chap h2{font-size:1.2rem;margin:0 0 2px}
+.chap .num{font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.chap .gist{color:var(--muted);margin:2px 0 12px;font-size:.95rem}
+.chap h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+dl.concepts{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:6px 16px;margin:0}
+dl.concepts dt{font-weight:600}
+dl.concepts dd{margin:0;color:var(--text)}
+@media (max-width:560px){dl.concepts{grid-template-columns:1fr}dl.concepts dd{margin-bottom:6px}}
+.big p{margin:0 0 10px;max-width:78ch}
+.big p:last-child{margin-bottom:0}
+ol.flow{counter-reset:f;list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ol.flow li{counter-increment:f;position:relative;padding:6px 10px 6px 40px;background:var(--surface-2);border-radius:8px;font-size:.95rem}
+ol.flow li::before{content:counter(f);position:absolute;left:10px;top:7px;width:21px;height:21px;border-radius:50%;background:var(--accent);color:var(--bg);font-size:.75rem;font-weight:700;display:grid;place-items:center}
+.example{margin:10px 0 0;padding:10px 14px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;font-size:.94rem}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table.tr{border-collapse:collapse;width:100%;min-width:560px;font-size:.9rem}
+table.tr th,table.tr td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--border)}
+table.tr th{background:var(--surface-2);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+table.tr tr:last-child td{border-bottom:none}
+table.tr td:first-child{font-weight:600;width:24%}
+table.tr td.pro::before{content:"+ ";color:var(--ok);font-weight:700}
+table.tr td.con::before{content:"− ";color:#b0413e;font-weight:700}
+ul.pits{margin:0;padding-left:20px}
+ul.pits li{margin:4px 0}
+body.compact .deep{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.85rem;border:1px solid var(--border);background:var(--surface-2);border-radius:999px;padding:2px 10px}
+.chip b{color:var(--accent);margin-right:4px}
+details.sonic{margin-top:14px;border:1px solid var(--border);border-radius:10px;background:var(--ok-soft)}
+details.sonic summary{cursor:pointer;padding:9px 14px;font-weight:600;color:var(--ok)}
+details.sonic .body{padding:0 14px 12px}
+details.sonic .body p{margin:0 0 8px}
+details.sonic .body ul{margin:0 0 8px;padding-left:18px}
+.hidden{display:none!important}
+mark{background:var(--accent-soft);color:inherit;border-radius:3px}
+#glossary .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+#glossary table{border-collapse:collapse;width:100%;min-width:520px;font-size:.9rem}
+#glossary th,#glossary td{text-align:left;vertical-align:top;padding:7px 11px;border-bottom:1px solid var(--border)}
+#glossary th{background:var(--surface-2)}
+#glossary td:first-child{font-weight:600;white-space:nowrap;color:var(--accent)}
+#glossary td:last-child{font-size:.82rem;color:var(--muted)}
+.letters{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px}
+.letters a{text-decoration:none;font-size:.85rem;padding:2px 7px;border:1px solid var(--border);border-radius:6px;color:var(--muted)}
+footer{padding:28px 0 60px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--border);margin-top:24px}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:10;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 14px;font:inherit;font-size:.85rem;cursor:pointer}
+noscript p{background:var(--surface-2);padding:12px;border-radius:8px}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a class="brand" href="index.html">About SONiC</a>
+  <a href="index.html">Home</a>
+  <a href="SONiC_Guide.html">SONiC Guide</a>
+  <a class="active" href="Key_Concepts.html">Key Concepts</a>
+  <a href="System_Design_QA.html">System Design Q&amp;A</a>
+  <a href="SONiC_vs_Ceph.html">SONiC vs Ceph</a>
+  <a href="https://github.com/sonic-net/SONiC/blob/master/README.md">Repo README</a>
+</div></div>
+
+<header><div class="wrap">
+  <span class="kicker">Reference · Vol. 1 &amp; 2</span>
+  <h1>Key concepts, chapter by chapter</h1>
+  <p>Each chapter of <em>System Design Interview</em> (Alex Xu, Vol. 1 &amp; 2) is covered in six parts:</p>
+  <ul style="color:var(--muted);margin:6px 0 10px;max-width:72ch">
+    <li><strong>The big picture:</strong> what problem the chapter solves and why the design looks the way it does.</li>
+    <li><strong>Key concepts:</strong> the terms you should be able to define.</li>
+    <li><strong>How it works:</strong> the request or data flow, step by step.</li>
+    <li><strong>Trade-offs:</strong> the options, with pros and cons.</li>
+    <li><strong>Pitfalls &amp; follow-up questions:</strong> what interviewers tend to probe.</li>
+    <li><strong>Acronyms,</strong> plus a collapsed <strong>"How this relates to SONiC"</strong> note. Try to make the connection yourself before you open it.</li>
+  </ul>
+  <p>Use <strong>Compact view</strong> to show only the concepts and acronyms. An A–Z acronym index is at the bottom.</p>
+</div></header>
+
+<div class="toolbar"><div class="wrap">
+  <input type="search" id="q" placeholder="Filter concepts or acronyms (e.g. quorum, ISR, idempotent)…" aria-label="Filter concepts">
+  <button class="btn" id="toggleSonic" type="button" aria-pressed="false">Show all SONiC notes</button>
+  <button class="btn" id="toggleCompact" type="button" aria-pressed="false">Compact view</button>
+  <span class="count" id="count"></span>
+</div></div>
+
+<div class="wrap layout">
+<nav class="side" aria-label="Chapters"><ol id="toc"></ol></nav>
+<main>
+  <noscript><p>This page builds its chapter list with JavaScript. Please enable scripts to view it.</p></noscript>
+  <div id="content"></div>
+  <p id="empty" class="hidden" style="color:var(--muted)">Nothing matches your filter.</p>
+  <section id="glossary">
+    <h2 class="vol">A–Z acronym index</h2>
+    <div class="letters" id="letters"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Acronym</th><th>Stands for</th><th>Chapter(s)</th></tr></thead>
+      <tbody id="gloss"></tbody>
+    </table></div>
+  </section>
+</main>
+</div>
+
+<footer><div class="wrap">Next: <a href="System_Design_QA.html">practice with the Q&amp;A →</a> · SONiC doc links open the design docs in <a href="https://github.com/sonic-net/SONiC">sonic-net/SONiC</a>. Concept lists are study summaries, not quotations from the books.</div></footer>
+
+<button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle color theme">Toggle theme</button>
+
+<script>
+var D='https://github.com/sonic-net/SONiC/blob/master/doc/', DT='https://github.com/sonic-net/SONiC/tree/master/doc/';
+var CH=[
+/* ---------------- VOLUME 1 ---------------- */
+{id:'v1-1',vol:1,n:1,t:'Scale from zero to millions of users',
+ g:'How a single-server app grows into a multi-tier, multi-data-center system.',
+ c:[['Vertical scaling','Add CPU/RAM to one machine. Simple, but has a hard ceiling and is a single point of failure.'],
+    ['Horizontal scaling','Add more machines. Needs load balancing and partitioning, but gives redundancy.'],
+    ['Load balancer','Spreads traffic across servers, hides server IPs, and enables failover.'],
+    ['Database replication','A primary takes writes and replicas serve reads. Gives read scaling and failover, at the cost of replication lag.'],
+    ['Cache','Fast in-memory tier for hot reads. You choose the expiration, eviction (LRU/LFU) and consistency strategy.'],
+    ['CDN','Edge servers cache static content near users. Controlled by a TTL.'],
+    ['Stateless web tier','Session state lives in a shared store, so any server can handle any request.'],
+    ['GeoDNS / multi-DC','Routes users to the nearest data center. Requires data sync and traffic failover.'],
+    ['Message queue','Buffers work between producers and consumers so each can scale and fail independently.'],
+    ['Sharding','Splits data by a shard key. Watch for resharding, hotspots ("celebrity problem"), and cross-shard joins.']],
+ a:[['DNS','Domain Name System'],['CDN','Content Delivery Network'],['SPOF','Single Point Of Failure'],['TTL','Time To Live'],['RDBMS','Relational Database Management System'],['NoSQL','Non-relational ("Not only SQL") database'],['LRU','Least Recently Used'],['LFU','Least Frequently Used'],['DC','Data Center']],
+ s:'<ul><li><b>Stateless tier:</b> SONiC daemons keep their durable state in Redis, so a crashed container restarts and rebuilds from the database (<a href="SONiC_Guide.html#containers">containers</a>).</li><li><b>Message queue:</b> APPL_DB sits between fpmsyncd and orchagent and absorbs route bursts.</li><li><b>Sharding:</b> multi-ASIC systems run one database/swss/syncd set per ASIC (<a href="'+D+'multi_asic/SONiC_multi_asic_hld.md">multi-ASIC HLD</a>).</li><li><b>SPOF:</b> on a single switch the <code>database</code> container is a SPOF by design. If it restarts, the dependent services restart too.</li></ul>'},
+{id:'v1-2',vol:1,n:2,t:'Back-of-the-envelope estimation',
+ g:'Rough math to size a system and sanity-check a design.',
+ c:[['Powers of two','2¹⁰ ≈ 1 thousand (KB), 2²⁰ ≈ 1 million (MB), 2³⁰ ≈ 1 billion (GB), 2⁴⁰ ≈ 1 trillion (TB), 2⁵⁰ (PB).'],
+    ['Latency numbers','Memory ≈ 100 ns. Round trip within a data center ≈ 0.5 ms. Disk seek ≈ 10 ms. Cross-continent ≈ 150 ms.'],
+    ['Availability "nines"','99.9% ≈ 8.8 h/yr down. 99.99% ≈ 53 min. 99.999% ≈ 5 min.'],
+    ['QPS / peak QPS','Average requests per second (DAU × actions / 86,400). Peak is typically 2–3× the average.'],
+    ['Storage estimate','Items per day × size × retention. Add replication overhead.'],
+    ['Bits vs bytes','Network speeds are in bits (Gbps) and storage is in bytes. Divide by 8.']],
+ a:[['QPS','Queries Per Second'],['DAU','Daily Active Users'],['MAU','Monthly Active Users'],['SLA','Service Level Agreement'],['SLO','Service Level Objective'],['Gbps','Gigabits per second']],
+ s:'<ul><li>Switch capacity math: a 32 × 400G switch is 12.8 Tbps. Hardware tables hold a finite number of routes, neighbors and ACL entries.</li><li><a href="'+D+'crm/Critical-Resource-Monitoring-High-Level-Design.md">CRM</a> is estimation turned into monitoring: used vs available entries per table, with thresholds.</li><li><a href="'+D+'route-performance/README.md">Route performance</a>: time to program N routes = N ÷ throughput of the slowest pipeline stage.</li></ul>'},
+{id:'v1-3',vol:1,n:3,t:'A framework for system design interviews',
+ g:'Four steps: scope → high-level design → deep dive → wrap-up.',
+ c:[['Functional requirements','What the system does (features, APIs).'],
+    ['Non-functional requirements','How well it does it: scale, latency, availability, consistency, security, cost.'],
+    ['High-level design','A box diagram of the major components and data flow, agreed with the interviewer.'],
+    ['Deep dive','Detailed design of the hardest or most important components.'],
+    ['Trade-off','An explicit choice between competing goals, such as latency vs consistency.'],
+    ['Bottleneck / failure analysis','Where the system breaks at 10× scale, and what happens when each component fails.']],
+ a:[['API','Application Programming Interface'],['MVP','Minimum Viable Product'],['NFR','Non-Functional Requirement']],
+ s:'<p>SONiC\'s <a href="'+D+'guidelines/hld_template.md">HLD template</a> follows the same arc: Requirements → Architecture → High-level design → SAI/DB/CLI changes → Warm-boot impact → Restrictions and limitations → Testing. The <a href="'+D+'guidelines/SONiC%20feature%20quality%20definition.md">feature quality definition</a> reads like a non-functional requirements checklist.</p>'},
+{id:'v1-4',vol:1,n:4,t:'Design a rate limiter',
+ g:'Throttle clients to protect shared resources.',
+ c:[['Token bucket','Tokens refill at a set rate up to a capacity. Each request uses one. Allows bursts.'],
+    ['Leaking bucket','A FIFO queue drained at a constant rate. Produces smooth output.'],
+    ['Fixed window counter','Counts requests per time window. Bursts at the edges of windows can reach 2× the limit.'],
+    ['Sliding window log','Keeps a timestamp for every request. Exact, but uses a lot of memory.'],
+    ['Sliding window counter','Weighted blend of the current and previous windows. Cheap and close enough.'],
+    ['Hard vs soft limit','A hard limit is never exceeded. A soft limit allows a brief overshoot.'],
+    ['Race condition','Concurrent read-modify-write on a counter. Fix with atomic operations or Lua scripts.'],
+    ['Rate-limit headers','<code>X-Ratelimit-Limit/Remaining/Retry-After</code>, returned with HTTP 429.']],
+ a:[['HTTP 429','"Too Many Requests" status code'],['FIFO','First In, First Out'],['CIR','Committed Information Rate (token refill rate)'],['CBS','Committed Burst Size (bucket depth)'],['PIR','Peak Information Rate']],
+ s:'<ul><li><b>CoPP</b> (Control Plane Policing) is a hardware token bucket per trap group, using CIR/CBS, that protects the switch CPU from floods of ARP, BGP and LLDP packets (<a href="'+D+'copp/CoPP%20Config%20and%20Management.md">CoPP design</a>).</li><li><b>Storm control</b> rate-limits broadcast, unknown-unicast and multicast traffic per port (<a href="'+D+'bum_storm_control/bum_storm_control_hld.md">HLD</a>).</li><li><b>Syslog rate limiting</b> per container, with a burst setting (<a href="'+D+'syslog/syslog-rate-limit-design.md">design</a>).</li><li>The lesson "place the limiter as early as possible" is taken literally here: packets are dropped in the ASIC before they ever reach the CPU.</li></ul>'},
+{id:'v1-5',vol:1,n:5,t:'Design consistent hashing',
+ g:'Distribute keys so that adding or removing a server moves as few keys as possible.',
+ c:[['Rehashing problem','<code>hash(key) % N</code> remaps almost every key when N changes.'],
+    ['Hash ring','Servers and keys are placed on a circular hash space. A key goes to the first server clockwise.'],
+    ['Virtual nodes','Each server appears at many points on the ring, which balances load and allows weighting.'],
+    ['Minimal redistribution','Only about K/N keys move when one server is added or removed.'],
+    ['Hotspot','One key or partition receives far more traffic than the others.']],
+ a:[['SHA-1','Secure Hash Algorithm 1'],['ECMP','Equal-Cost Multi-Path'],['5-tuple','Src IP, Dst IP, Src port, Dst port, Protocol'],['K/N','Keys ÷ Nodes (the fraction of keys that move)']],
+ s:'<ul><li><b>ECMP</b> hashes each flow\'s 5-tuple to pick a next hop. With plain modulo, a link failure reshuffles most flows.</li><li><b>Fine-grained ECMP</b> uses a fixed bucket table, and only the failed member\'s buckets move. This is consistent hashing in hardware (<a href="'+D+'ecmp/fine_grained_next_hop_hld.md">FG-NHG HLD</a>).</li><li>Configurable hash fields and algorithms: <a href="'+D+'hash/hash-design.md">hash design</a>. Consistent ECMP for tunnels: <a href="'+D+'vxlan/Consistent_ecmp_for_Vxlan_tunnel.md">VXLAN</a>.</li></ul>'},
+{id:'v1-6',vol:1,n:6,t:'Design a key-value store',
+ g:'A Dynamo-style distributed store: partitioning, replication, consistency, and failure handling.',
+ c:[['CAP theorem','When the network is partitioned, choose Consistency or Availability.'],
+    ['Partitioning','Spread keys across nodes, typically with consistent hashing.'],
+    ['Quorum (N/W/R)','N replicas, W write acks, R read replies. W+R&gt;N gives strong consistency.'],
+    ['Consistency models','Strong, weak, and eventual.'],
+    ['Vector clock','A [server, version] list used to detect concurrent, conflicting writes.'],
+    ['Gossip protocol','Nodes exchange heartbeat tables to detect failures without a central coordinator.'],
+    ['Sloppy quorum / hinted handoff','Write to healthy stand-in nodes and hand the data back when the owner recovers.'],
+    ['Merkle tree','A hash tree that finds replicas that differ with minimal data transfer (anti-entropy).'],
+    ['Write path','Commit log → memtable → flush to an SSTable.'],
+    ['Read path','Memtable → Bloom filter → SSTable. Compaction merges files in the background.']],
+ a:[['CAP','Consistency, Availability, Partition tolerance'],['PACELC','If Partition: A or C; Else: Latency or Consistency'],['KV','Key-Value'],['LSM','Log-Structured Merge (tree)'],['SSTable','Sorted String Table'],['WAL','Write-Ahead Log']],
+ s:'<ul><li>SONiC\'s backbone is Redis, a single-node in-memory KV store split into logical databases by role (<a href="SONiC_Guide.html#databases">databases</a>).</li><li>There is no quorum, because the switch is one node. Durability means CONFIG_DB is saved to <code>config_db.json</code>; the other databases are rebuilt at boot.</li><li>Partitioning for write hotspots: <a href="'+D+'database/multi_database_instances.md">multiple Redis instances</a> (reported 20–30% faster) and <a href="'+D+'multi_asic/DB_Design_for_multi_asic.md">per-ASIC DBs</a>.</li><li>Compare with the <a href="SONiC_vs_Ceph.html">SONiC vs Ceph</a> page. Ceph uses RocksDB, an LSM tree, inside BlueStore.</li></ul>'},
+{id:'v1-7',vol:1,n:7,t:'Design a unique ID generator',
+ g:'Generate unique, sortable 64-bit IDs across many machines.',
+ c:[['Multi-master auto-increment','Each server increments by k. Hard to scale, and IDs are not time-ordered.'],
+    ['UUID','128 bits, generated locally with no coordination. Not numeric and not sortable.'],
+    ['Ticket server','A central database auto-increment. Simple, but a single point of failure.'],
+    ['Snowflake','1 sign + 41 timestamp + 5 data center + 5 machine + 12 sequence bits.'],
+    ['Epoch','The custom zero time for the timestamp bits. 41 bits of milliseconds last about 69 years.'],
+    ['Clock synchronization','Machines must agree on time. NTP helps, and a clock going backwards must be handled.']],
+ a:[['UUID','Universally Unique Identifier'],['NTP','Network Time Protocol'],['PTP','Precision Time Protocol'],['ms','millisecond']],
+ s:'<ul><li><b>VID vs RID:</b> sairedis gives the software stable <em>virtual</em> object IDs, and syncd maps them to <em>real</em> hardware IDs that may change after a restart (<a href="'+D+'warm-reboot/view_switch.md">view switch</a>).</li><li>Time sync on the switch: <a href="'+D+'ntp/ntp-design.md">NTP design</a> and <a href="'+D+'ptp/ptp.md">PTP</a>, which gives sub-microsecond accuracy for finance and telecom.</li></ul>'},
+{id:'v1-8',vol:1,n:8,t:'Design a URL shortener',
+ g:'Map long URLs to short codes and redirect quickly.',
+ c:[['301 vs 302 redirect','A 301 is permanent and cached by the browser. A 302 is temporary, so every click can be tracked.'],
+    ['Hash + collision resolution','Take a prefix of CRC32/MD5/SHA-1 and handle collisions (a Bloom filter speeds up the checks).'],
+    ['Base-62 conversion','Encode a unique numeric ID with [0-9a-zA-Z]. 7 characters give ≈ 3.5 trillion codes.'],
+    ['Bloom filter','A probabilistic set: "definitely not present" or "maybe present."'],
+    ['Read-heavy caching','Cache the short→long mapping, because redirects far outnumber creates.']],
+ a:[['URL','Uniform Resource Locator'],['CRC','Cyclic Redundancy Check'],['MD5','Message Digest 5'],['HTTP','Hypertext Transfer Protocol']],
+ s:'<ul><li>CRC shows up in ASICs too. ECMP and LAG hash algorithms commonly include CRC and XOR variants (<a href="'+D+'hash/hash-design.md">hash design</a>).</li><li>The pattern "map a short key to a big object, with a cache in front" resembles how orchagent maps table keys to SAI objects and caches them in memory.</li></ul>'},
+{id:'v1-9',vol:1,n:9,t:'Design a web crawler',
+ g:'Download and process billions of pages politely and robustly.',
+ c:[['BFS traversal','Crawl breadth-first. DFS can go arbitrarily deep.'],
+    ['URL frontier','The queue of URLs still to fetch. Enforces priority and politeness.'],
+    ['Politeness','One worker per host queue, with delays between requests.'],
+    ['Priority','Rank URLs by importance (PageRank, traffic, update frequency).'],
+    ['Freshness','Recrawl pages according to how often they change.'],
+    ['robots.txt','The site\'s crawl rules. Cache them per host.'],
+    ['Content dedupe','Hash page content to skip duplicates.'],
+    ['Spider trap','An infinite URL space. Limit URL length and depth.']],
+ a:[['BFS','Breadth-First Search'],['DFS','Depth-First Search'],['HTML','HyperText Markup Language'],['DNS','Domain Name System']],
+ s:'<ul><li>Graph discovery on a network: <b>LLDP</b> lets each switch learn its neighbors, and tools build the topology from that, like crawling a graph.</li><li><b>ZTP</b> (<a href="'+D+'ztp/ztp.md">design</a>) has a fetch-and-process pipeline with retries.</li><li>Extensibility with plug-ins: the <a href="'+D+'sonic-application-extension/sonic-application-extention-hld.md">application extension</a> framework.</li></ul>'},
+{id:'v1-10',vol:1,n:10,t:'Design a notification system',
+ g:'Push, SMS and email at scale, delivered reliably.',
+ c:[['Third-party providers','APNs (iOS), FCM (Android), SMS gateways, email services.'],
+    ['Device token / contact info','The identifiers needed to reach a user on each channel.'],
+    ['Queue per channel','Isolates provider outages. iOS failures don\'t block email.'],
+    ['Retry + notification log','Persist notifications and retry with backoff to avoid losing them.'],
+    ['Deduplication','Delivery is at-least-once, so dedupe by event ID.'],
+    ['Templates &amp; settings','Consistent formatting, and respecting user opt-outs.'],
+    ['Event tracking','Sent, delivered, opened and clicked, for analytics.']],
+ a:[['APNs','Apple Push Notification service'],['FCM','Firebase Cloud Messaging'],['SMS','Short Message Service'],['SMTP','Simple Mail Transfer Protocol']],
+ s:'<ul><li>The <a href="'+D+'event-alarm-framework/event-alarm-framework.md">event-alarm framework</a> publishes structured events described by YANG schemas instead of free-text logs. Subscribers such as gNMI collectors consume them.</li><li>Other channels: syslog and SNMP traps.</li><li>Back-pressure policy when consumers are slow: <a href="'+D+'orchagent/notification_queue_policy_hld.md">notification queue policy</a>.</li></ul>'},
+{id:'v1-11',vol:1,n:11,t:'Design a news feed system',
+ g:'Publish posts and build each user\'s feed.',
+ c:[['Feed publishing','Write the post, then fan it out to followers.'],
+    ['Fanout on write (push)','Precompute feeds. Reads are fast, but writes are costly for celebrities.'],
+    ['Fanout on read (pull)','Build the feed at read time. No wasted work, but reads are slower.'],
+    ['Hybrid fanout','Push for most users, pull for high-follower accounts.'],
+    ['Feed cache (IDs only)','Store post IDs and fill in the full posts on read.'],
+    ['Cache tiers','Feed, content, social graph, actions and counters, each cached separately.']],
+ a:[['CDN','Content Delivery Network'],['ID','Identifier']],
+ s:'<ul><li><b>BGP is a fanout system.</b> A route change is advertised to many peers. FRR groups peers that share an outbound policy into <em>update groups</em>, so it formats the update once and sends it to all of them. That is a fanout-on-write optimization.</li><li><b>Write coalescing:</b> ConsumerStateTable\'s pending-key set means repeated updates to one key collapse into one (<a href="SONiC_Guide.html#databases">databases</a>).</li></ul>'},
+{id:'v1-12',vol:1,n:12,t:'Design a chat system',
+ g:'1:1 and group messaging in real time, with presence.',
+ c:[['Polling / long polling','The client repeatedly asks, or holds a request open, for new messages.'],
+    ['WebSocket','A persistent, bidirectional connection. The default for real-time traffic.'],
+    ['Stateful chat servers','Hold client connections. Service discovery picks which server a client uses.'],
+    ['Message storage','A KV or wide-column store, because of the heavy writes and recent-history reads.'],
+    ['Message ID ordering','Sortable IDs, global (Snowflake-style) or local per channel.'],
+    ['Presence','Online status based on heartbeats, with a timeout to avoid flapping.'],
+    ['Sync queue / inbox','A per-recipient message queue for group fanout.']],
+ a:[['WS','WebSocket'],['TCP','Transmission Control Protocol'],['E2EE','End-to-End Encryption'],['KV','Key-Value']],
+ s:'<ul><li><b>BGP sessions</b> are long-lived TCP connections with keepalive and hold timers. These work like presence heartbeats.</li><li><b>BFD</b> is fast heartbeat-based liveness detection (<a href="'+D+'smart-switch/BFD/SmartSwitchDpuLivenessUsingBfd.md">DPU liveness via BFD</a>).</li><li><b>gNMI streaming</b> keeps persistent gRPC subscriptions (<a href="'+D+'system-telemetry/grpc_telemetry.md">telemetry</a>).</li></ul>'},
+{id:'v1-13',vol:1,n:13,t:'Design a search autocomplete system',
+ g:'Return the top-k suggestions for a prefix in milliseconds.',
+ c:[['Trie (prefix tree)','Each node is a prefix, and its children extend it by one character.'],
+    ['Top-k cached at nodes','Store the best k queries at each node, trading memory for O(1) lookups.'],
+    ['Data gathering service','Aggregates query logs offline and rebuilds the trie periodically.'],
+    ['Query service','Serves suggestions from a trie cache backed by a trie database.'],
+    ['Shard by prefix','Partition by historical load, not by letter range alone.'],
+    ['Filter layer','Removes harmful or unwanted suggestions before serving.']],
+ a:[['AJAX','Asynchronous JavaScript and XML'],['k (top-k)','Number of suggestions returned']],
+ s:'<ul><li><b>Longest Prefix Match (LPM)</b> is the core of IP routing. The ASIC finds the most specific prefix matching a destination IP using TCAM or algorithmic trie-like structures. Autocomplete and routing are both prefix-lookup problems.</li><li>The route table is SONiC\'s "trie," fed by BGP. See <a href="SONiC_Guide.html#route">life of a route</a>.</li></ul>'},
+{id:'v1-14',vol:1,n:14,t:'Design YouTube',
+ g:'Upload, transcode and stream video globally.',
+ c:[['Blob storage','Stores the raw and transcoded video files.'],
+    ['Transcoding','Converts to multiple bitrates, resolutions and codecs.'],
+    ['DAG pipeline','Transcoding tasks run as a configurable directed acyclic graph.'],
+    ['Pre-signed URL','Lets clients upload directly to storage with scoped permissions.'],
+    ['Adaptive streaming','The client switches bitrate depending on bandwidth.'],
+    ['GOP chunking','Split video on Group-Of-Pictures boundaries for parallel and resumable uploads.'],
+    ['CDN cost control','Serve popular content from the CDN and the long tail from origin.']],
+ a:[['DAG','Directed Acyclic Graph'],['GOP','Group Of Pictures'],['HLS','HTTP Live Streaming'],['MPEG-DASH','Dynamic Adaptive Streaming over HTTP'],['BLOB','Binary Large Object']],
+ s:'<ul><li>Name collision to watch for: SONiC <b>DASH</b> means <em>Disaggregated API for SONiC Hosts</em>, not MPEG-DASH (<a href="'+D+'dash/dash-sonic-hld.md">DASH HLD</a>).</li><li>The switch fabric carries this traffic. QoS, buffers and ECMP decide whether video flows run smoothly (<a href="'+DT+'qos">QoS docs</a>).</li></ul>'},
+{id:'v1-15',vol:1,n:15,t:'Design Google Drive',
+ g:'File storage and sync across devices.',
+ c:[['Block server','Splits files into blocks, then compresses, encrypts and uploads them.'],
+    ['Delta sync','Upload only the blocks that changed.'],
+    ['Deduplication','Blocks with the same hash are stored once.'],
+    ['Metadata DB','Strongly consistent (ACID) record of files, versions and blocks.'],
+    ['Sync conflict','The first version processed wins. The later one is saved as a conflicted copy.'],
+    ['Notification service','Long polling tells clients when to pull changes.'],
+    ['Cold storage','Rarely accessed versions move to cheaper tiers.']],
+ a:[['ACID','Atomicity, Consistency, Isolation, Durability'],['S3','Simple Storage Service (AWS)'],['HA','High Availability']],
+ s:'<ul><li><b>Delta sync for config:</b> <a href="'+D+'config-generic-update-rollback/SONiC_Generic_Config_Update_and_Rollback_Design.md">Generic Config Update</a> applies JSON Patch changes, and <em>checkpoints</em> give rollback, like file versions.</li><li><b>Golden config</b> is one desired-state file (<a href="'+D+'golden_config/Multi-Asic_Single_JSON_Configuration_Design.md">design</a>).</li><li><code>config_db.json</code> is the persisted "file" and CONFIG_DB is the live copy.</li></ul>'},
+/* ---------------- VOLUME 2 ---------------- */
+{id:'v2-1',vol:2,n:1,t:'Proximity service',
+ g:'Find nearby businesses (Yelp-style).',
+ c:[['Geohash','Encodes lat/long as a base-32 string. A longer shared prefix means the points are closer.'],
+    ['Geohash precision','Each extra character shrinks the cell. Choose the length from the search radius.'],
+    ['Boundary issue','Nearby points can have different prefixes, so also search the 8 neighboring cells.'],
+    ['Quadtree','An in-memory tree that splits a cell until it holds ≤ K items. Adapts to density.'],
+    ['Google S2','Maps the sphere onto a Hilbert curve. Good for geofences.'],
+    ['Read replicas / caching','Business data is read-heavy and changes rarely.']],
+ a:[['LBS','Location-Based Service'],['GIS','Geographic Information System'],['lat/long','Latitude / Longitude']],
+ s:'<ul><li><b>Geohash precision ≈ IP prefix length.</b> A /24 is more specific than a /16, just as a 6-character geohash is more specific than a 4-character one. Both lookups search by longest shared prefix.</li><li>"Also search the neighboring cells" resembles route aggregation. A covering prefix can hide more-specific routes that you must still take into account.</li></ul>'},
+{id:'v2-2',vol:2,n:2,t:'Nearby friends',
+ g:'Real-time friend locations within a radius.',
+ c:[['WebSocket servers','Stateful connections that receive location updates about every 30 s.'],
+    ['Location cache (TTL)','The latest location per user. It expires when the user goes inactive.'],
+    ['Redis pub/sub','One channel per user. Friends subscribe and receive updates.'],
+    ['Fanout cost','Updates × friends. Only nearby friends need pushes.'],
+    ['Pub/sub sharding','Channels spread over a Redis cluster using consistent hashing.'],
+    ['Service discovery','ZooKeeper or etcd holds the hash ring and the list of servers.']],
+ a:[['TTL','Time To Live'],['pub/sub','Publish / Subscribe'],['etcd','Distributed key-value store (from "/etc" + distributed)']],
+ s:'<ul><li>SONiC depends on <b>Redis pub/sub and keyspace notifications</b>. ProducerStateTable publishes, ConsumerStateTable subscribes, and daemons wake on events rather than polling (<a href="SONiC_Guide.html#databases">databases</a>).</li><li>Difference: SONiC\'s pub/sub is local to one box. The book\'s design has to shard it across a cluster.</li></ul>'},
+{id:'v2-3',vol:2,n:3,t:'Google Maps',
+ g:'Map rendering, routing and ETA for a billion users.',
+ c:[['Map tiles','Pre-rendered images or vectors per zoom level, served from a CDN.'],
+    ['Geocoding','Converts an address to lat/long. Reverse geocoding does the opposite.'],
+    ['Routing tiles','The road graph split into tiles at several levels of detail.'],
+    ['Shortest path','A* or Dijkstra over the hierarchical routing tiles.'],
+    ['ETA service','Predicts travel time from live and historical traffic (often with ML).'],
+    ['Adaptive rerouting','Pushes a new route to the client when traffic changes.']],
+ a:[['ETA','Estimated Time of Arrival'],['GPS','Global Positioning System'],['ML','Machine Learning'],['A*','"A-star" heuristic search algorithm']],
+ s:'<ul><li><b>Routing protocols</b> are the network\'s "maps" service. BGP picks the best path per prefix, and <b>ECMP</b> keeps several equal-cost routes.</li><li><b>Hierarchy:</b> data-center Clos fabrics are tiered (T0 = ToR, T1 = leaf/spine, T2), like local streets, arterials and highways.</li><li><b>RIB vs FIB</b> is like "compute routes" vs "serve precomputed tiles" (<a href="'+D+'ribfib/sonic-fib_lld.md">FIB LLD</a>).</li></ul>'},
+{id:'v2-4',vol:2,n:4,t:'Distributed message queue',
+ g:'A Kafka-like durable, partitioned log.',
+ c:[['Topic / partition','A topic is split into partitions for parallelism. Ordering holds only within a partition.'],
+    ['Broker','A server hosting partitions.'],
+    ['Offset','A consumer\'s position in a partition.'],
+    ['Consumer group','Consumers that share the work. Each partition goes to one consumer in the group.'],
+    ['WAL / segments','An append-only log on disk, split into segment files for retention.'],
+    ['Leader / follower replication','Writes go to the leader, and followers copy them.'],
+    ['ISR','Replicas that are caught up with the leader.'],
+    ['acks=0/1/all','The durability vs latency setting on the producer.'],
+    ['Delivery semantics','At-most-once, at-least-once, exactly-once.'],
+    ['Batching','Improves throughput at the cost of latency.'],
+    ['Rebalancing','A coordinator reassigns partitions when consumers change.']],
+ a:[['MQ','Message Queue'],['WAL','Write-Ahead Log'],['ISR','In-Sync Replicas'],['ZK','ZooKeeper'],['ZMQ','ZeroMQ (brokerless messaging library)']],
+ s:'<ul><li><b>ProducerStateTable / ConsumerStateTable</b> is SONiC\'s message queue on Redis (<a href="SONiC_Guide.html#databases">databases</a>).</li><li><b>Batching trade-off in practice:</b> the <a href="'+D+'bgp_loading_optimization/bgp-loading-optimization-hld.md">BGP loading HLD</a> found that fpmsyncd flushed too often and used too small a pipeline.</li><li><b>ZMQ state tables</b> skip Redis on hot paths, with async sends and retries (<a href="'+D+'sonic-swss-common/ZMQ%20producer-consumer%20state%20table%20design.md">design</a>).</li><li>SONiC has no disk log or replicas, because the state is soft and can be recomputed. That is a deliberate difference.</li></ul>'},
+{id:'v2-5',vol:2,n:5,t:'Metrics monitoring & alerting',
+ g:'Collect, store, query and alert on time-series metrics.',
+ c:[['Time series','A metric name + labels + (timestamp, value) points.'],
+    ['Cardinality','The number of unique label combinations. High cardinality is expensive to store.'],
+    ['Pull vs push','A scraper pulls from targets, or agents push to collectors.'],
+    ['TSDB','Storage optimized for append-heavy writes and range aggregation.'],
+    ['Downsampling','Lower resolution for older data, to save storage.'],
+    ['Alert rules','Threshold or expression plus duration. Deduplicate, group and route alerts.'],
+    ['Kafka buffer','Decouples collection from storage and absorbs spikes.']],
+ a:[['TSDB','Time-Series Database'],['SNMP','Simple Network Management Protocol'],['gNMI','gRPC Network Management Interface'],['PromQL','Prometheus Query Language']],
+ s:'<ul><li><b>Flex counters:</b> orchagent registers counters in FLEX_COUNTER_DB, and syncd polls the ASIC into COUNTERS_DB (<a href="'+D+'flex_counter/flex_counter_refactor.md">design</a>).</li><li><b>Pull and push:</b> SNMP and gNMI Get are pull. gNMI Subscribe and <a href="'+D+'high-frequency-telemetry/high-frequency-telemetry-hld.md">high-frequency telemetry</a> are push.</li><li><b>Threshold alerts:</b> <a href="'+D+'crm/Critical-Resource-Monitoring-High-Level-Design.md">CRM</a> uses high and low thresholds so alerts don\'t flap.</li><li>Health rollup: <a href="'+D+'system_health_monitoring/system-health-HLD.md">system health</a>.</li></ul>'},
+{id:'v2-6',vol:2,n:6,t:'Ad click event aggregation',
+ g:'Count billions of clicks accurately in near real time.',
+ c:[['Stream vs batch','Low-latency incremental results vs periodic complete recomputation.'],
+    ['Lambda architecture','Batch and streaming paths side by side, with two codebases.'],
+    ['Kappa architecture','Streaming only. Reprocess by replaying the log.'],
+    ['Event time vs processing time','When the click happened vs when the system saw it.'],
+    ['Watermark','How long a window waits for late events.'],
+    ['Tumbling / sliding window','Fixed non-overlapping windows vs overlapping windows.'],
+    ['Exactly-once','Commit offsets and results atomically, and dedupe by event ID.'],
+    ['Reconciliation','A batch job that checks and corrects the streaming results.']],
+ a:[['CTR','Click-Through Rate'],['CPM','Cost Per Mille (per 1,000 impressions)'],['MapReduce','Map → shuffle → reduce batch computation model']],
+ s:'<ul><li><b>sFlow</b> samples 1-in-N packets on the switch and sends them to a collector that aggregates flows. It is stream aggregation with sampling (<a href="'+D+'sflow/sflow_hld.md">sFlow HLD</a>).</li><li>Counters are cumulative, so collectors compute rates over windows, much like tumbling-window aggregation.</li></ul>'},
+{id:'v2-7',vol:2,n:7,t:'Hotel reservation system',
+ g:'Book rooms without double booking.',
+ c:[['Idempotency key','A unique reservation ID that makes retries and double-clicks safe.'],
+    ['Pessimistic locking','<code>SELECT … FOR UPDATE</code>. Safe, but causes contention.'],
+    ['Optimistic locking','A version column that is checked on write. Retry on conflict.'],
+    ['Database constraints','<code>CHECK</code> invariants enforced by the database.'],
+    ['Overbooking','Deliberately sell above capacity (for example 110%).'],
+    ['Microservices trade-off','Distributed transactions vs a shared database.']],
+ a:[['ACID','Atomicity, Consistency, Isolation, Durability'],['2PC','Two-Phase Commit'],['SQL','Structured Query Language']],
+ s:'<ul><li><b>Idempotency:</b> during warm restart, state is replayed into syncd. <a href="'+D+'warm-reboot/sai_redis_api_idempotence.md">Idempotent SAI calls</a> prevent duplicate hardware objects.</li><li><b>Check capacity before booking:</b> orchagent checks resource availability (CRM counters) before creating SAI objects. When a table is full, the task is retried or fails (<a href="'+D+'error-handling/orchagent_error_handling.md">error handling</a>).</li></ul>'},
+{id:'v2-8',vol:2,n:8,t:'Distributed email service',
+ g:'Gmail-scale sending, receiving, storage and search.',
+ c:[['SMTP / IMAP / POP','Sending protocol, and two retrieval protocols.'],
+    ['MX record','The DNS record that says where a domain\'s mail is delivered.'],
+    ['Metadata store','Partitioned by user_id and denormalized for folder and read-state queries.'],
+    ['Attachment storage','Object storage for large blobs.'],
+    ['Search','Either an external index (Elasticsearch) or a custom LSM-based index per user.'],
+    ['Deliverability','IP warm-up, feedback loops, SPF, DKIM and DMARC.']],
+ a:[['SMTP','Simple Mail Transfer Protocol'],['IMAP','Internet Message Access Protocol'],['POP','Post Office Protocol'],['MX','Mail Exchanger (DNS record)'],['SPF','Sender Policy Framework'],['DKIM','DomainKeys Identified Mail'],['DMARC','Domain-based Message Authentication, Reporting &amp; Conformance']],
+ s:'<ul><li>The connection is loose. The closest analog is log and event shipping: syslog forwarding to remote servers (<a href="'+D+'syslog/syslog-design.md">syslog design</a>), with a rate limit per source.</li><li>"Partition by owner" appears in multi-ASIC, where each ASIC namespace owns its own state.</li></ul>'},
+{id:'v2-9',vol:2,n:9,t:'S3-like object storage',
+ g:'Durable, massively scalable blob storage.',
+ c:[['Bucket / object','A namespace and an immutable blob identified by a key.'],
+    ['Metadata vs data store','Small mutable metadata vs large immutable data, scaled separately.'],
+    ['Replication vs erasure coding','3× copies (200% overhead) vs k+m parity (for example 8+4, 50% overhead).'],
+    ['Durability','For example "11 nines." Depends on failure domains and repair speed.'],
+    ['Append-only data files','Many small objects packed into large files, located by (file, offset, size).'],
+    ['Checksums','Detect corruption when data is read.'],
+    ['Multipart upload','Upload large objects in parallel parts, then combine them.'],
+    ['Versioning / delete marker','Keep old versions. A delete writes a marker.'],
+    ['Garbage collection / compaction','Reclaim space from deleted objects.']],
+ a:[['S3','Simple Storage Service'],['EC','Erasure Coding'],['RAID','Redundant Array of Independent Disks'],['RGW','RADOS Gateway (Ceph\'s S3 API)']],
+ s:'<ul><li>This chapter is the bridge to the <a href="SONiC_vs_Ceph.html">SONiC vs Ceph</a> page. Ceph is a real open-source S3-like system: RGW over RADOS, with CRUSH placement and replication or EC.</li><li>SONiC uses the same metadata-vs-data split in its own way. The databases hold metadata and intent, while the ASIC holds the "data" (forwarding tables).</li></ul>'},
+{id:'v2-10',vol:2,n:10,t:'Real-time gaming leaderboard',
+ g:'Rank millions of players in real time.',
+ c:[['Redis sorted set','Unique members with scores, ordered by score.'],
+    ['Skip list','A layered linked list with O(log n) search. It backs sorted sets.'],
+    ['ZINCRBY / ZREVRANGE / ZREVRANK','Increment a score, get the top N, get a player\'s rank.'],
+    ['Sharding by score range','The top-N query stays on one shard.'],
+    ['Hash sharding + scatter-gather','Balanced shards, but top-N must query every shard.'],
+    ['Tie-breaking','Use a secondary key such as the time the score was reached.']],
+ a:[['O(log n)','Logarithmic time complexity'],['NoSQL','Non-relational database']],
+ s:'<ul><li>SONiC uses Redis <em>hashes</em> (table rows) and <em>sets</em> (the pending-key set), not sorted sets. It is a useful reminder that each data structure has its own cost.</li><li>Ranking and ordering in networking: route preference (administrative distance, BGP best-path) and <a href="'+D+'ecmp/ordered_ecmp_next_hop_hld.md">ordered ECMP</a>.</li></ul>'},
+{id:'v2-11',vol:2,n:11,t:'Payment system',
+ g:'Move money reliably: pay-in, pay-out, ledger, reconciliation.',
+ c:[['Pay-in / pay-out','Money coming in from buyers, and going out to sellers.'],
+    ['PSP','An external processor that handles card networks.'],
+    ['Ledger','An append-only financial record.'],
+    ['Double-entry bookkeeping','Every transaction has an equal debit and credit, so the total is zero.'],
+    ['Reconciliation','Compare internal records with PSP and bank settlement files.'],
+    ['Retry with backoff','Exponential backoff plus jitter, for transient errors only.'],
+    ['DLQ','A dead-letter queue that parks messages which keep failing.'],
+    ['Exactly-once (effective)','At-least-once delivery plus idempotent processing.']],
+ a:[['PSP','Payment Service Provider'],['PCI DSS','Payment Card Industry Data Security Standard'],['DLQ','Dead-Letter Queue'],['API','Application Programming Interface']],
+ s:'<ul><li><b>Reconciliation</b> is central to SONiC. After a warm restart, the desired state (APPL_DB) is compared with the actual hardware state and only the differences are applied (<a href="'+D+'warm-reboot/swss_warm_restart.md">SWSS warm restart</a>).</li><li><b>Retries:</b> orchagent keeps unresolved tasks, such as a route waiting on a neighbor, and retries them later.</li></ul>'},
+{id:'v2-12',vol:2,n:12,t:'Digital wallet',
+ g:'Balance transfers at over 1M TPS with strong correctness.',
+ c:[['Distributed transaction','An atomic update across several databases or shards.'],
+    ['2PC / 3PC','Database-level prepare/commit. Locks are held, and the coordinator is a single point of failure.'],
+    ['TC/C','Try-Confirm/Cancel. Application-level, with compensation.'],
+    ['Saga','A chain of local transactions, each with a compensating action.'],
+    ['Event sourcing','Store commands and events, and derive the state by replaying them.'],
+    ['CQRS','Separate write and read models.'],
+    ['Snapshot','Periodically saved state, which speeds up replay.'],
+    ['Raft','A consensus protocol that replicates the event log.']],
+ a:[['TPS','Transactions Per Second'],['2PC','Two-Phase Commit'],['3PC','Three-Phase Commit'],['TC/C','Try-Confirm/Cancel'],['CQRS','Command Query Responsibility Segregation']],
+ s:'<ul><li><b>A form of event sourcing:</b> sairedis can record every SAI operation to <code>sairedis.rec</code>. Replaying it reproduces hardware programming for debugging.</li><li><b>Snapshots and checkpoints:</b> GCU checkpoints (<a href="'+D+'config-generic-update-rollback/SONiC_Generic_Config_Update_and_Rollback_Design.md">design</a>), and the database snapshots saved for warm reboot.</li><li>No Raft is needed inside one switch. Across switches, protocols such as ICCP (<a href="'+D+'mclag/Sonic-mclag-hld.md">MCLAG</a>) sync state between peers.</li></ul>'},
+{id:'v2-13',vol:2,n:13,t:'Stock exchange',
+ g:'Match orders at microsecond latency, fairly and deterministically.',
+ c:[['Order book','Buy and sell orders per symbol, sorted by price and then time.'],
+    ['Matching engine','Pairs orders using price-time priority.'],
+    ['Sequencer','Stamps each event with a sequence number, giving a single total order.'],
+    ['Market data','Order-book and trade feeds (L1/L2/L3 depth).'],
+    ['Low-latency design','Single server, single thread per core, mmap and ring buffers, no garbage collection or disk on the critical path.'],
+    ['Determinism','The same input log always produces the same output, which enables hot-warm failover.'],
+    ['Fairness','Equal access latency, often through co-location.']],
+ a:[['FIX','Financial Information eXchange protocol'],['mmap','Memory-mapped file'],['L1/L2/L3','Market-data depth levels'],['DDoS','Distributed Denial of Service'],['GC','Garbage Collection']],
+ s:'<ul><li><b>Single-threaded, ordered processing:</b> orchagent is a single-threaded event loop. That makes it simple and deterministic, but it can limit throughput (<a href="'+D+'orchagent/orchagent_route_redesign.md">route redesign</a>).</li><li><b>Latency:</b> the ASIC forwards in hundreds of nanoseconds, and cut-through switching matters to trading firms.</li><li><b>Time:</b> <a href="'+D+'ptp/ptp.md">PTP</a> provides the precise timestamps that exchanges and regulators require.</li></ul>'}
+];
+
+/* ---------- In-depth material: o = big picture, w = how it works, e = worked example / rules of thumb,
+   t = trade-offs [option, pros, cons], p = pitfalls & follow-up questions ---------- */
+var EX={
+'v1-1':{
+ o:`<p>The chapter's central lesson is that <strong>no architecture is right from the start</strong>. You grow a system by finding the current bottleneck or single point of failure, removing it, and repeating. Every step buys scale or reliability and costs complexity: another tier to operate, another consistency problem, another failure mode.</p><p>Interviewers use this progression to check that you know <em>why</em> each component exists. A cache is there because the database is overloaded with reads. A queue is there because producers and consumers run at different speeds. Sharding is there because one primary can no longer take all the writes or hold all the data.</p>`,
+ w:[`<b>Single server:</b> DNS points users to one machine running the web app and the database.`,
+    `<b>Split tiers:</b> move the database to its own server so the web and data tiers scale independently.`,
+    `<b>Load balancer:</b> put several web servers behind a public LB and give the servers private IPs. If one dies, traffic goes to the others.`,
+    `<b>Replication:</b> one primary database takes writes and several replicas serve reads. If the primary fails, a replica is promoted.`,
+    `<b>Cache (cache-aside):</b> read from the cache first. On a miss, read the database and fill the cache.`,
+    `<b>CDN:</b> serve static assets (images, JS, CSS) from edge locations near users.`,
+    `<b>Stateless web tier:</b> move sessions to a shared store so any server can handle any request, which makes autoscaling possible.`,
+    `<b>Multiple data centers:</b> GeoDNS routes users to the nearest data center. Data is replicated asynchronously, and failover is tested regularly.`,
+    `<b>Message queue:</b> slow work (photo processing, emails) runs asynchronously in workers that scale on their own.`,
+    `<b>Observability and automation:</b> logging, metrics and CI/CD become essential once you have many servers.`,
+    `<b>Sharding:</b> when a single primary can't keep up with writes or data size, split the data by a shard key.`],
+ t:[[`SQL (relational)`,`ACID transactions, joins, mature tooling, a well-known model`,`Harder to scale writes horizontally. The schema is rigid.`],
+    [`NoSQL`,`Scales horizontally, flexible schema, very low latency at scale`,`Usually weaker consistency, no joins, you must design around query patterns`],
+    [`Synchronous replication`,`No data loss on failover`,`Every write waits for the replica, so it is slower and less available`],
+    [`Asynchronous replication`,`Fast writes, and replicas can be far away`,`Replication lag, and recent writes can be lost on failover`],
+    [`Cache-aside`,`Simple, and only data that is actually read gets cached`,`The first read is a miss, and the cache can hold stale data`],
+    [`Write-through cache`,`The cache is always fresh`,`Writes are slower, and data that is never read still gets cached`]],
+ p:[`<b>Cache stampede:</b> a hot key expires and thousands of requests hit the database at once. Fix it with request coalescing (one request refills the key), randomized TTLs, or refreshing early.`,
+    `<b>Read-your-writes:</b> because of replication lag, a user may not see their own update. Send that user's reads to the primary for a short time after they write.`,
+    `<b>Hot shards (the celebrity problem):</b> one shard key gets heavy traffic. Give that key its own shard or split it further.`,
+    `<b>Resharding:</b> use consistent hashing or a directory service so that adding shards moves as little data as possible.`,
+    `<b>Cross-shard joins:</b> denormalize, or join in the application.`,
+    `<b>Follow-up question:</b> "A whole data center goes down. What happens?" Answer: GeoDNS fails over, the data is already replicated, and the stateless tier means the servers hold nothing that is lost.`]},
+'v1-2':{
+ o:`<p>Estimation is about <strong>getting the order of magnitude right</strong>, not precision. The goal is to learn which regime you are in. Does it fit on one machine? In memory? Do you need a cache or a CDN? Is this bound by storage or by QPS?</p><p>State your assumptions out loud, round hard (86,400 ≈ 10⁵), write the units down, and sanity-check the answer against physical limits (RAM per server, disk throughput, network bandwidth).</p>`,
+ w:[`State the assumptions: DAU, actions per user per day, object sizes, read:write ratio, retention.`,
+    `Average QPS = DAU × actions ÷ 86,400. Use 10⁵ seconds per day for quick math.`,
+    `Peak QPS = average × 2 to 10, depending on how spiky the traffic is.`,
+    `Storage per day = writes/day × size. Multiply by retention and by the replication factor.`,
+    `Bandwidth = QPS × payload size. Check ingress and egress separately.`,
+    `Servers = peak QPS ÷ per-server capacity. Add headroom for failures.`,
+    `Sanity check: can the hot set fit in RAM? Can the disks sustain the write rate?`],
+ e:`<b>Worked example (Twitter-like):</b> 150M DAU × 2 tweets = 300M/day ≈ <b>3.5k write QPS</b>, peaking around 7k. If reads are 100× writes, that is about <b>350k read QPS</b>, so caching and a precomputed feed are mandatory. Media: 10% of tweets × 1 MB ≈ 30 TB/day ≈ 55 PB over 5 years, so you need object storage and a CDN.<br><b>Rules of thumb:</b> 1M requests/day ≈ 12 QPS. 1 Gbps ≈ 125 MB/s. Reading 1 MB sequentially: about 0.25 ms from memory, about 1 ms from SSD, about 20 ms from spinning disk.`,
+ t:[[`Precise estimate`,`Feels rigorous`,`Burns interview time. False precision hides the assumptions that matter.`],
+    [`Order-of-magnitude estimate`,`Fast, and focuses on architecture-changing thresholds`,`Needs clearly stated assumptions so the interviewer can follow`]],
+ p:[`Mixing up bits and bytes, which puts you off by 8×.`,`Forgetting replication and index overhead (often 2 to 3× raw storage).`,`Designing for the average and forgetting the peak.`,`Not writing the units down, then losing track of KB vs MB.`,`<b>Follow-up question:</b> "What changes if traffic grows 10×?" Say which threshold you cross, such as the data no longer fitting in RAM.`]},
+'v1-3':{
+ o:`<p>A system design interview is not scored on reaching the "correct" design. It is a simulation of two engineers solving an ambiguous problem together. The interviewer is looking at how you <strong>clarify requirements, structure the problem, reason about trade-offs, and communicate</strong>.</p><p>The four-step framework is a time budget for a 45 to 60 minute session. It makes sure you don't spend 30 minutes on one component and never produce an end-to-end design.</p>`,
+ w:[`<b>Step 1: understand and scope (3 to 10 min).</b> Ask: which features? how many users? how fast will it grow? which platforms? what existing technology can we use? Write down your assumptions.`,
+    `<b>Step 2: high-level design (10 to 15 min).</b> Sketch the APIs, a box diagram and the data model. Do quick estimates. Walk through the main use cases and get the interviewer's agreement.`,
+    `<b>Step 3: deep dive (10 to 25 min).</b> Agree with the interviewer on which parts matter most (often the bottleneck or the novel part). Go deep on them and compare alternatives.`,
+    `<b>Step 4: wrap-up (3 to 5 min).</b> Recap, name the bottlenecks, cover failure scenarios and monitoring, and say how you would handle the next 10× of scale.`],
+ t:[[`Breadth first, then depth`,`Guarantees an end-to-end design and shows you see the whole picture`,`Can feel shallow if you never get to the deep dive`],
+    [`Depth first`,`Shows expertise in one area`,`Risks running out of time with no complete design`]],
+ p:[`<b>Do:</b> ask clarifying questions, think out loud, offer several approaches, and start with the most critical components.`,`<b>Don't:</b> jump straight to a solution, over-engineer, go silent, or declare that you're done early.`,`If you get stuck, ask for a hint. Collaboration is part of what is being assessed.`,`Interviewers often push back on purpose to see how you defend or adjust a trade-off.`]},
+'v1-4':{
+ o:`<p>A rate limiter caps how many requests a client can make in a period. It <strong>prevents resource starvation and DoS, controls cost</strong> (for example, paid third-party APIs), and <strong>enforces fairness</strong> between tenants.</p><p>The requirements usually include: accurate limiting, very low added latency, small memory footprint, working across many servers, clear feedback to throttled clients, and fault tolerance. The last one means deciding whether a limiter outage should let traffic through (fail open) or block it (fail closed).</p>`,
+ w:[`A request reaches the limiter, usually middleware or an API gateway.`,
+    `The limiter finds the matching rule (for example "5 login attempts per minute per user"). Rules come from config files and are cached in memory.`,
+    `It reads the client's counter or bucket from a shared store (Redis), keyed by user ID, IP or API key.`,
+    `Under the limit: forward the request and update the counter atomically.`,
+    `Over the limit: return <b>HTTP 429</b> with rate-limit headers. Drop the request, or queue it for later.`],
+ t:[[`Token bucket`,`Allows bursts, simple, memory-efficient, widely used (Amazon, Stripe)`,`Two parameters (rate, size) to tune`],
+    [`Leaking bucket`,`Constant, smooth output rate. Memory-efficient.`,`A burst fills the queue with old requests and recent ones get dropped`],
+    [`Fixed window counter`,`Very simple, easy to explain to users`,`Up to 2× the limit around window boundaries`],
+    [`Sliding window log`,`Exactly accurate`,`Stores every timestamp, even for rejected requests, so memory use is high`],
+    [`Sliding window counter`,`Smooths the boundary spikes, low memory`,`An approximation that assumes requests are spread evenly`]],
+ p:[`<b>Race condition:</b> two servers read counter = 3 and both write 4. Use atomic <code>INCR</code>, Lua scripts, or Redis sorted sets.`,
+    `<b>Synchronization:</b> keeping local counters per server lets clients exceed the limit by spreading requests. Use a central store, or accept an approximate global limit.`,
+    `<b>Fail open vs fail closed:</b> most public APIs fail open so a limiter outage isn't a site outage. Security-sensitive endpoints such as login may fail closed.`,
+    `<b>Identity:</b> many users can share one IP behind NAT, so limiting per IP punishes them. Prefer API keys or user IDs.`,
+    `<b>Layers:</b> limit at L3/L4 (iptables, and CoPP in hardware) as well as at L7.`,
+    `<b>Client side:</b> clients should honor <code>Retry-After</code> and use exponential backoff with jitter.`]},
+'v1-5':{
+ o:`<p>Distributed caches and databases must map every key to a server. <code>hash(key) % N</code> is perfectly balanced but <strong>brittle</strong>: changing N remaps almost every key, which causes a storm of cache misses or bulk data migration.</p><p>Consistent hashing puts servers and keys on the same circular hash space, so a membership change only moves the keys next to the changed server. Dynamo, Cassandra, Discord, Akamai, and load balancers such as Google's Maglev use it or its variants.</p>`,
+ w:[`Hash each server (by name or IP) to a point on a ring, for example SHA-1's 0 to 2¹⁶⁰−1 space.`,
+    `Hash each key onto the same ring, then walk clockwise to the first server. That server owns the key.`,
+    `<b>Adding a server:</b> only the keys between the new server and its counter-clockwise neighbor move.`,
+    `<b>Removing a server:</b> its keys move to the next server clockwise. No other keys move.`,
+    `<b>Virtual nodes:</b> give each server 100 to 200 positions. Load spreads much more evenly, and a powerful server can be given more positions.`,
+    `<b>Replication:</b> store each key on the next R distinct <em>physical</em> servers clockwise.`],
+ t:[[`Modulo hashing`,`Trivial, perfectly even`,`Changing N remaps almost everything`],
+    [`Ring without virtual nodes`,`Minimal key movement`,`Uneven partitions and load`],
+    [`Ring with virtual nodes`,`Even load, capacity weighting`,`Ring metadata grows. More neighbors are involved on rebalance.`],
+    [`Rendezvous (HRW) hashing`,`No ring, simple, minimal movement`,`O(N) work per lookup`],
+    [`Jump consistent hash`,`Tiny memory footprint, very fast`,`Buckets must be numbered, and only the last one can be removed`],
+    [`Maglev lookup table`,`O(1) lookup, near-minimal disruption`,`The table must be rebuilt when membership changes`]],
+ p:[`Consistent hashing balances <em>keys</em>, not <em>traffic</em>. One hot key still overloads one server. Fix that with replication, caching or key splitting.`,
+    `Clients need the same view of the ring. Distribute it with a config service (ZooKeeper, etcd) or with gossip.`,
+    `<b>Follow-up question:</b> "How many keys move when you add the 11th server to 10?" About 1/11 of them.`]},
+'v1-6':{
+ o:`<p>A single-server key-value store is a hash table in memory plus disk for overflow. Its limit is capacity. Distributing it forces you to face the <strong>CAP theorem</strong>: when the network partitions, you must choose between consistency and availability.</p><p>The chapter builds an AP, Dynamo-style store and maps each requirement to a technique. Big data and incremental scalability → <b>consistent hashing</b>. High availability → <b>replication</b> across nodes and data centers. Tunable consistency → <b>quorums</b>. Resolving conflicts → <b>vector clocks</b>. Temporary failures → <b>sloppy quorum and hinted handoff</b>. Permanent failures → <b>Merkle trees</b>. Mixed hardware → <b>virtual nodes</b>.</p>`,
+ w:[`<b>Coordinator:</b> the client contacts any node, which acts as coordinator for that request.`,
+    `<b>Write:</b> the coordinator sends the write to the N replicas. Each appends to its <b>commit log</b> and updates its <b>memtable</b>. When the memtable is full it is flushed to an immutable <b>SSTable</b>. Success is returned after W acknowledgments.`,
+    `<b>Read:</b> the coordinator queries replicas and waits for R responses. Each replica checks its memtable, then uses <b>Bloom filters</b> to skip SSTables that can't hold the key, then reads the SSTable.`,
+    `<b>Conflict:</b> if replicas return versions whose vector clocks are concurrent, both are returned to the client to reconcile.`,
+    `<b>Background work:</b> compaction merges SSTables. Anti-entropy compares Merkle trees and repairs replicas that differ.`],
+ t:[[`CP system`,`Never returns stale or conflicting data`,`Becomes unavailable during partitions`],
+    [`AP system`,`Always accepts reads and writes`,`Stale reads, and conflicts to resolve later`],
+    [`W=1, R=N`,`Fast writes`,`Slow reads`],
+    [`W=N, R=1`,`Fast reads`,`Slow writes. One slow replica blocks every write.`],
+    [`W=R=2, N=3`,`Strong consistency (W+R&gt;N) with some tolerance for failure`,`Moderate latency on both reads and writes`],
+    [`LSM tree`,`Very high write throughput (sequential I/O)`,`Read amplification, and compaction causes latency spikes`],
+    [`B-tree`,`Predictable reads, good at range scans`,`Random writes in place, so writes are slower`]],
+ p:[`<b>Vector clocks grow</b> with the number of writers. Pruning old entries saves space but can make reconciliation inaccurate.`,
+    `<b>Last-write-wins</b> is simple but silently loses data when clocks are skewed.`,
+    `<b>Deletes</b> need tombstones. Otherwise a lagging replica can bring deleted data back.`,
+    `<b>Read repair:</b> fix stale replicas that a read happens to find.`,
+    `<b>Follow-up question:</b> "Where does your design sit under PACELC?" Even without a partition, you are trading latency against consistency.`]},
+'v1-7':{
+ o:`<p>A single database's <code>AUTO_INCREMENT</code> breaks down once data is sharded: IDs collide, or the database becomes a bottleneck. The usual requirements are IDs that are <strong>unique, numeric, 64-bit, roughly time-ordered, and generated at 10k+ per second</strong> with no coordination on the hot path.</p><p>Twitter's Snowflake meets them by packing a timestamp, a machine identity and a per-millisecond sequence into 64 bits. Each machine generates IDs independently, and sorting by ID is roughly sorting by time.</p>`,
+ w:[`At startup, assign each generator a data center ID and a machine ID (from config or ZooKeeper).`,
+    `For each ID, read the current time in milliseconds since a custom epoch.`,
+    `Same millisecond as the last ID: increment the 12-bit sequence. New millisecond: reset the sequence to 0.`,
+    `The sequence overflows past 4,096: wait for the next millisecond.`,
+    `The clock went <em>backwards</em>: refuse to generate, or wait until time catches up, to avoid duplicates.`,
+    `Compose the ID: <code>(ts &lt;&lt; 22) | (dc &lt;&lt; 17) | (machine &lt;&lt; 12) | seq</code>.`],
+ t:[[`Multi-master auto-increment`,`Uses existing databases`,`Hard to add servers. IDs aren't time-ordered across servers.`],
+    [`UUID v4`,`No coordination, trivially scalable`,`128 bits, not numeric, random order hurts index locality`],
+    [`Ticket server`,`Numeric, simple, easy to reason about`,`Single point of failure, or tricky sync if you run two`],
+    [`Snowflake`,`64-bit, time-sortable, no runtime coordination`,`Depends on synchronized clocks. Machine IDs must be managed.`]],
+ p:[`Clock skew and NTP adjustments can move time backwards, so the generator must detect this.`,
+    `IDs reveal the creation time and roughly how many IDs are being issued. That can matter for security or business confidentiality.`,
+    `Tune the bits to your needs: fewer sequence bits for low concurrency, more timestamp bits for a longer lifetime.`,
+    `UUID v7 and ULID are time-ordered 128-bit alternatives.`]},
+'v1-8':{
+ o:`<p>A URL shortener is a <strong>read-heavy key-value mapping</strong> with a few twists: how to generate the short code, which redirect status to use, and how to scale redirects.</p><p>Typical numbers: 100M new URLs a day (≈1,160 writes/s) and a 10:1 read ratio (≈11,600 reads/s). Over 10 years that is 365B records at about 100 bytes each, roughly 36.5 TB. The APIs are <code>POST /api/v1/data/shorten</code> and <code>GET /api/v1/{shortUrl}</code>.</p>`,
+ w:[`<b>Shorten:</b> if the long URL already exists in the database, return its code. Otherwise get a new unique ID, convert it to base 62, and store (id, shortURL, longURL).`,
+    `<b>Redirect:</b> the load balancer sends the request to a web server, which looks up the short code in the cache.`,
+    `On a cache miss, read the database and fill the cache.`,
+    `Return a 301 or 302 with a <code>Location: longURL</code> header.`],
+ t:[[`Hash + collision resolution`,`Fixed-length codes. No ID service needed.`,`Must check for collisions (a database lookup or a Bloom filter)`],
+    [`Base-62 of a unique ID`,`No collisions, simple`,`Codes are predictable and enumerable. Needs an ID generator.`],
+    [`301 redirect`,`Browsers cache it, so server load is lower`,`You lose click analytics`],
+    [`302 redirect`,`Every click reaches you, so analytics work`,`Higher server load`]],
+ p:[`Sequential codes let attackers enumerate every URL. Add randomness if that matters.`,`Custom aliases need a uniqueness check.`,`Rate-limit creation to stop spam. Scan destinations for malware.`,`Scale the database with read replicas and sharding by code.`]},
+'v1-9':{
+ o:`<p>A crawler starts from seed URLs, downloads pages, extracts links, and repeats. It is used for search indexing, web archiving, data mining and monitoring. At 1B pages a month that is about 400 pages/s (peaking around 800). At 500 KB per page it is about 500 TB a month, or about 30 PB over 5 years.</p><p>The four qualities that matter are <strong>scalability</strong> (parallel downloads), <strong>robustness</strong> (bad HTML, crashes, traps), <strong>politeness</strong> (don't overload any site) and <strong>extensibility</strong> (new content types).</p>`,
+ w:[`Seed URLs go into the <b>URL frontier</b>.`,
+    `The <b>HTML downloader</b> fetches pages, using a cached <b>DNS resolver</b> and cached robots.txt.`,
+    `The <b>content parser</b> validates the HTML.`,
+    `<b>Content seen?</b> compares the page's hash with stored hashes to drop duplicate pages.`,
+    `The <b>link extractor</b> pulls out URLs, and the <b>URL filter</b> drops blacklisted types and domains.`,
+    `<b>URL seen?</b> (a Bloom filter or hash table) skips URLs already crawled. New URLs go back into the frontier.`],
+ t:[[`BFS`,`Covers the breadth of the web, and is the natural fit`,`Without politeness controls it hammers one host with that host's own links`],
+    [`DFS`,`Simple`,`Can go arbitrarily deep into one site`],
+    [`Frontier in memory`,`Fast`,`Can't hold billions of URLs, and is lost on a crash`],
+    [`Frontier on disk with memory buffers`,`Scalable and durable`,`More complex, with I/O latency`]],
+ p:[`JavaScript-heavy pages need server-side rendering to see their real links.`,`Spider traps (for example infinite calendars) need limits on depth and URL length.`,`About 30% of the web is duplicate content, so dedupe is essential.`,`Place crawl servers near the target hosts to cut download latency.`]},
+'v1-10':{
+ o:`<p>A notification system sends <strong>mobile push, SMS and email</strong> on behalf of many internal services. Example scale: 10M push, 1M SMS and 5M emails a day. Delivery is <em>soft real-time</em> (a few seconds of delay is fine), and users can opt out.</p><p>The key design decision is <strong>decoupling</strong>. Services should not call providers directly, and one slow provider must not block the others.</p>`,
+ w:[`An internal service calls the notification API.`,
+    `The notification server authenticates the caller, applies rate limits, and validates the request.`,
+    `It fetches the user's settings, device tokens and contact info (from cache, falling back to the database), and renders the template.`,
+    `It puts the message on the <b>queue for that channel</b> (iOS, Android, SMS, email).`,
+    `Workers pull from the queues and call the providers (APNs, FCM, an SMS gateway, an email service).`,
+    `On failure, the worker records it in the notification log and retries with backoff. Delivery events are tracked for analytics.`],
+ t:[[`Single notification server`,`Simple`,`Single point of failure, hard to scale, and one slow provider blocks everything`],
+    [`Queue per channel with workers`,`Isolation, independent scaling, buffering`,`More components to run`],
+    [`At-least-once delivery`,`Nothing is lost`,`Duplicates are possible, so dedupe by event ID`],
+    [`At-most-once delivery`,`Never duplicates`,`Messages can be lost`]],
+ p:[`Don't spam users. Rate-limit per user and respect their settings.`,`Providers have outages and quotas, so monitor queue depth.`,`Device tokens change, so remove invalid ones.`,`Protect the API with an appKey and appSecret so only authorized services can send.`]},
+'v1-11':{
+ o:`<p>A news feed has two flows. <strong>Feed publishing</strong> writes a post and distributes it. <strong>News feed building</strong> assembles a user's feed. The hard part is fanout: one post by a user with 5,000 friends, or 50M followers, has to show up in all of their feeds.</p><p>The design caches aggressively and stores only <em>IDs</em> in feed caches, hydrating the full post and author when the feed is read.</p>`,
+ w:[`<b>Publish:</b> <code>POST /v1/me/feed</code> → web servers (auth, rate limit) → post service writes to the database and cache.`,
+    `The <b>fanout service</b> gets friend IDs from the graph database, filters them by settings (muted users, privacy), and puts jobs on a queue.`,
+    `Fanout workers write <code>&lt;post_id, user_id&gt;</code> into each friend's feed cache.`,
+    `<b>Read:</b> <code>GET /v1/me/feed</code> → the news feed service reads post IDs from the feed cache.`,
+    `It hydrates users and posts from their caches and returns the result. Media is served from a CDN.`],
+ t:[[`Fanout on write (push)`,`Feeds are precomputed, so reads are fast`,`Hot-key storms for celebrities, and wasted work for inactive users`],
+    [`Fanout on read (pull)`,`No wasted work. Celebrities are cheap.`,`Slow reads, because the feed is built on demand`],
+    [`Hybrid`,`Push for most users, pull for celebrities`,`More complex, because two paths are merged at read time`]],
+ p:[`Keep only the most recent N IDs in the feed cache, since few users scroll far.`,`Like counts and comments need their own counters and caches.`,`Paginate with cursors (last seen ID), not offsets.`,`<b>Follow-up question:</b> "How would you rank the feed?" Add a ranking service that scores candidates.`]},
+'v1-12':{
+ o:`<p>A chat system supports 1:1 and small group chats (up to about 100 members), online presence, several devices per user, and push notifications, at something like 50M DAU.</p><p>The services split into <strong>stateless</strong> ones (login, profile, service discovery, behind a load balancer), <strong>stateful</strong> chat servers (holding persistent WebSocket connections), and <strong>third-party</strong> push providers. Chat servers are stateful, so service discovery must assign each client a server and handle reconnection.</p>`,
+ w:[`User A sends a message over WebSocket to chat server 1.`,
+    `The chat server gets a message ID from the ID generator and puts the message on the <b>message sync queue</b>.`,
+    `The message is stored in a key-value store (for example HBase or Cassandra).`,
+    `If B is online, it is forwarded to B's chat server and delivered over WebSocket. If B is offline, a push notification is sent.`,
+    `<b>Multiple devices:</b> each device keeps <code>cur_max_message_id</code> and fetches newer messages when it syncs.`,
+    `<b>Groups:</b> the message is copied into each member's inbox. This works for small groups but not huge channels.`],
+ t:[[`Short polling`,`Simplest`,`Wasteful. Most requests return nothing.`],
+    [`Long polling`,`Fewer empty responses`,`The server can't easily tell when a client has disconnected. Reconnects are expensive.`],
+    [`WebSocket`,`Bidirectional, persistent, low latency`,`Stateful servers, so load balancing and failover are harder`],
+    [`Relational database for history`,`Familiar, supports joins`,`Hard to scale to billions of messages and heavy writes`],
+    [`Key-value / wide-column store`,`Horizontal scale, fast access to recent messages`,`Limited querying`]],
+ p:[`Presence changes in large groups fan out expensively, so fetch presence when a user opens the group instead.`,`Use heartbeats with a timeout so short network blips don't make users flap offline and online.`,`When a chat server crashes, clients reconnect through service discovery and resync by message ID.`,`End-to-end encryption means the server can't search or index messages.`]},
+'v1-13':{
+ o:`<p>Autocomplete (typeahead) returns the top-k most popular queries for each prefix while the user types. It must respond in under about 100 ms. Because every keystroke is a query, 10M DAU can mean about 24k QPS.</p><p>The design separates a <strong>data gathering service</strong>, which builds a trie offline from query logs, from a <strong>query service</strong>, which serves from an in-memory trie cache.</p>`,
+ w:[`Analytics logs record every query.`,
+    `Aggregators summarize the logs (for example weekly) into (query, frequency).`,
+    `Workers build a trie. Each node caches its top-k queries.`,
+    `The trie is stored in a trie database: either serialized snapshots in a document store, or a key-value store mapping prefix → top-k.`,
+    `The query service reads from the trie cache and falls back to the database on a miss.`,
+    `Optimizations: AJAX requests, browser caching (for example <code>Cache-Control: max-age=3600</code>), and sampling the logs.`],
+ t:[[`Weekly rebuild`,`Simple and stable`,`Misses trending queries`],
+    [`Real-time updates`,`Fresh and trending`,`Complex. Needs a streaming pipeline and live trie updates.`],
+    [`Top-k cached at every node`,`O(prefix length) lookups`,`Much more memory`]],
+ p:[`Supporting several languages means Unicode in the trie.`,`Country-specific suggestions mean separate tries, possibly on a CDN.`,`Harmful suggestions must be filtered immediately at serving time. They are removed from the data at the next rebuild.`,`Shard by prefix, balancing on historical load rather than on letters.`]},
+'v1-14':{
+ o:`<p>YouTube-scale video combines three problems: <strong>uploading</strong> large files, <strong>transcoding</strong> them into many formats, and <strong>streaming</strong> them to devices around the world. With 5M DAU the numbers are large. At 150 TB a day of new storage and heavy CDN egress, <strong>cost is a first-class design constraint</strong>.</p><p>In an interview, lean on managed building blocks (blob storage, a CDN) and spend the time on the transcoding pipeline and on cost.</p>`,
+ w:[`The client asks the API servers for a <b>pre-signed URL</b> and uploads straight to original blob storage, in parallel chunks aligned to GOP boundaries.`,
+    `Transcoding is a <b>DAG</b>. A preprocessor splits the job, the DAG scheduler plans tasks, a resource manager assigns workers, and workers encode video, audio, thumbnails and watermarks.`,
+    `The outputs go to encoded storage and are pushed to the CDN.`,
+    `A completion event goes on a queue. A handler updates the metadata database and cache, and notifies the uploader.`,
+    `<b>Streaming:</b> players fetch from the nearest CDN edge using adaptive bitrate (HLS or MPEG-DASH).`],
+ t:[[`Everything on the CDN`,`Best latency everywhere`,`Very expensive for the long tail of rarely watched videos`],
+    [`Popular videos on the CDN, the long tail from origin`,`Big cost savings`,`Slower for less popular content`],
+    [`Pre-transcode every format`,`Instant playback for any device`,`Storage and compute spent on formats nobody watches`],
+    [`On-demand transcoding`,`Saves storage`,`The first viewer waits`]],
+ p:[`Separate recoverable errors (retry) from non-recoverable ones (a corrupt upload), and report the second kind to the user.`,`Protect content with DRM, AES encryption and watermarking.`,`Live streaming changes the design: lower latency and smaller chunks.`,`Use queues between every stage so each can scale on its own.`]},
+'v1-15':{
+ o:`<p>A cloud drive needs upload and download, sync across devices, revision history, sharing and change notifications. It must be <strong>reliable</strong> (never lose data), <strong>fast to sync</strong>, and <strong>economical with bandwidth</strong>. Example numbers: 50M users, 10M DAU, 10 GB free each, and about 240 upload QPS.</p><p>The key idea is to split files into <strong>blocks</strong>, so only changed blocks move and identical blocks are stored once. Metadata is kept <strong>strongly consistent</strong> in a relational database.</p>`,
+ w:[`The client sends two requests in parallel: file metadata (status "pending") and the file content.`,
+    `Block servers split the file into blocks (about 4 MB each), compress and encrypt them, and upload them to cloud storage.`,
+    `When the upload finishes, a callback marks the file "uploaded" in the metadata database.`,
+    `The notification service (using long polling) tells the user's other clients that something changed.`,
+    `Those clients fetch the new metadata, download only the blocks they don't have, and rebuild the file.`],
+ t:[[`Long polling for notifications`,`Simple. Enough for infrequent, one-way updates.`,`Connections must be held and re-established`],
+    [`WebSocket`,`Bidirectional, real-time`,`More than a drive needs for occasional change events`],
+    [`Strong consistency for metadata`,`Clients never see mismatched versions`,`Needs ACID and careful cache invalidation`],
+    [`Keeping every version`,`Full history`,`Storage cost grows quickly. Cap versions or move old ones to cold storage.`]],
+ p:[`Sync conflicts: the first version processed wins, and the other is kept as a conflicted copy.`,`Save space with block-level dedupe, a limit on versions, and cold storage.`,`Plan for failures in every component: block servers, cross-region storage, promoting a metadata replica, and notification servers reconnecting (each may hold about 1M connections).`]},
+'v2-1':{
+ o:`<p>A proximity service (Yelp or "restaurants near me") has two parts with very different profiles. The <strong>location-based service (LBS)</strong> is read-only, stateless and high QPS. The <strong>business service</strong> handles low-QPS create, update and delete, and changes may take effect the next day.</p><p>The core question is how to <strong>index 2D points</strong> so that radius queries are fast. Separate indexes on latitude and longitude produce huge result sets that are expensive to intersect. Geospatial indexes such as geohash, quadtree and S2 solve this.</p>`,
+ w:[`The client sends (lat, long, radius).`,
+    `The LBS chooses a geohash precision that fits the radius and computes the user's cell.`,
+    `It adds the 8 neighboring cells to handle the boundary problem.`,
+    `It reads the business IDs for those 9 cells from a cache (geohash → [IDs]).`,
+    `It hydrates the business details from the business cache, computes exact distances, ranks and returns.`,
+    `Too few results: shorten the geohash to search a wider area.`],
+ e:`<b>Geohash precision:</b> length 4 ≈ 39 × 19.5 km, length 5 ≈ 4.9 × 4.9 km, length 6 ≈ 1.2 × 0.6 km. Pick the shortest length whose cell covers the radius.`,
+ t:[[`Evenly divided grid`,`Simple`,`Density is uneven: cities are crowded and oceans are empty`],
+    [`Geohash`,`A string prefix works in any key-value store or database index. Easy to update.`,`Boundary issues. Fixed precision levels.`],
+    [`Quadtree`,`Adapts to density, good for k-nearest queries`,`An in-memory structure that must be rebuilt at startup. Updates are harder.`],
+    [`Google S2`,`Arbitrary regions (geofences), accurate covering`,`Complex to understand and explain`]],
+ p:[`Nearby points can have completely different geohash prefixes, for example on opposite sides of the equator or the prime meridian.`,`Quadtree rebuilds at startup take minutes, so bring servers into rotation gradually.`,`Deploy in multiple regions for latency and data-residency rules.`,`Location data is sensitive. Minimize and anonymize it.`]},
+'v2-2':{
+ o:`<p>Unlike the proximity service, "nearby friends" is about locations that <strong>change constantly</strong> and must be <strong>pushed</strong> to friends in near real time. With 100M DAU, about 10% online at once and an update every 30 seconds, that is roughly 334k location updates per second. Each one fans out to that user's online friends.</p><p>The design uses persistent WebSocket connections and a <strong>Redis pub/sub channel per user</strong> as the routing layer.</p>`,
+ w:[`The client sends a location update over its WebSocket connection.`,
+    `The WebSocket server updates the <b>location cache</b> (latest position, with a TTL) and writes to the <b>location history</b> database (for example Cassandra).`,
+    `It publishes the update to <b>that user's pub/sub channel</b>.`,
+    `Each online friend's connection handler is subscribed to that channel and receives the update.`,
+    `The handler computes the distance. If the user is within range, it pushes the update to the friend's client.`],
+ t:[[`WebSocket`,`Bidirectional, low latency`,`Stateful servers, so deploys must drain connections`],
+    [`Redis pub/sub`,`Channels are very cheap. Built-in fanout.`,`Fire-and-forget (offline subscribers miss messages). The cluster is stateful.`],
+    [`Alternatives (Erlang/BEAM, Kafka)`,`Erlang handles millions of lightweight processes. Kafka is durable.`,`Different operational trade-offs, and possibly unfamiliar tooling`]],
+ p:[`Resizing the pub/sub cluster moves channels and triggers mass resubscription. Over-provision and resize during off-peak hours.`,`Users with many friends are hot spots.`,`"Nearby random people" means subscribing to geohash-cell channels instead of friend channels.`,`Handle stale locations with TTLs and "last seen" timestamps.`]},
+'v2-3':{
+ o:`<p>Google Maps combines <strong>map rendering</strong>, <strong>navigation and routing</strong>, <strong>ETA</strong> and <strong>location updates</strong> for about a billion users. The world map is petabytes of tiles across roughly 21 zoom levels. The road network is a huge graph.</p><p>The key ideas are <em>precompute and serve statically</em> (tiles from a CDN) and <em>divide and conquer</em> (routing tiles organized in a hierarchy).</p>`,
+ w:[`<b>Rendering:</b> the client computes the tile URLs from position and zoom level, and fetches the prebuilt tiles from the CDN.`,
+    `<b>Location updates:</b> clients batch GPS points (for example every 15 s). They flow through Kafka to the traffic, ML and personalization consumers.`,
+    `<b>Navigation:</b> geocoding turns addresses into coordinates. The route planner calls the shortest-path service (A* over routing tiles loaded on demand).`,
+    `The ETA service predicts times from live and historical traffic. A ranker applies filters (avoid tolls or highways) and returns the top routes.`,
+    `<b>Adaptive rerouting:</b> the system tracks active navigation sessions. When traffic changes on a route, it pushes a new route over WebSocket.`],
+ t:[[`Raster tiles`,`Simple to render`,`Large. Blurry between zoom levels.`],
+    [`Vector tiles`,`Small, smooth zoom, client-side styling`,`Needs rendering power on the client`],
+    [`Precomputed tiles on a CDN`,`Cheap, fast, scalable`,`Updates take time to propagate`]],
+ p:[`Hierarchical routing tiles (local streets, arterials, highways) keep long routes tractable.`,`ETA accuracy depends heavily on data freshness and on the ML model.`,`Location history is write-heavy, so a wide-column store fits.`]},
+'v2-4':{
+ o:`<p>Modern message queues such as Kafka and Pulsar are really <strong>durable, partitioned, replicated logs</strong>. Messages are kept after they are consumed (for example for two weeks), so several consumer groups and replays are possible. The design has to support configurable delivery semantics and let you trade throughput against latency.</p><p>Core insight: <strong>sequential disk I/O is fast</strong>. An append-only log with the OS page cache and batching gets close to memory speed, and consumers keep their own offsets, so the broker stays simple.</p>`,
+ w:[`The producer buffers messages and routes each one to a partition (by key hash, or round-robin).`,
+    `The partition's <b>leader</b> appends the batch to its active <b>segment</b> file.`,
+    `<b>Followers</b> pull from the leader. Once the in-sync replicas (<b>ISR</b>) have the batch, it is committed.`,
+    `The producer is acknowledged according to <code>acks</code> (0, 1 or all).`,
+    `Consumers in a <b>group</b> <em>pull</em> from their assigned partitions and commit their offsets. A coordinator rebalances when members change.`],
+ t:[[`Push to consumers`,`Low latency`,`Can overwhelm slow consumers`],
+    [`Pull by consumers`,`Consumers control their own pace, and batching is natural`,`Consumers poll even when there is no data`],
+    [`acks=0`,`Lowest latency`,`Messages can be lost`],
+    [`acks=1`,`Balanced`,`Lost if the leader fails before followers copy the message`],
+    [`acks=all`,`Durable`,`Highest latency`],
+    [`Large batches`,`High throughput`,`Higher latency`]],
+ p:[`Ordering holds only <em>within</em> a partition. Adding partitions changes the key → partition mapping.`,`Rebalance storms pause consumption.`,`Hot partitions come from skewed keys.`,`Exactly-once needs idempotent producers plus transactions, or idempotent consumers.`,`Kafka replaced ZooKeeper with KRaft (its own Raft) for metadata.`]},
+'v2-5':{
+ o:`<p>A metrics platform collects operational time series (CPU, latency, error rates) from a large fleet. An example is about 10M series, kept at full resolution for 7 days, 1-minute resolution for 30 days and 1-hour resolution for a year. It needs <strong>collection, transmission, storage, querying, alerting and visualization</strong>.</p><p>Writes are constant and heavy, while reads are bursty (dashboards, alert evaluation). That is why purpose-built time-series databases exist.</p>`,
+ w:[`Agents push, or scrapers pull, metrics from the targets.`,
+    `Data goes into <b>Kafka</b> to decouple collection from storage and absorb spikes.`,
+    `Stream consumers (for example Flink) process the data and write it to a <b>TSDB</b> (InfluxDB, Prometheus-compatible, and so on).`,
+    `The query service serves dashboards (Grafana) and the alert manager.`,
+    `The alert manager evaluates rules, deduplicates and groups alerts, and notifies by email, PagerDuty or webhook.`],
+ t:[[`Pull (Prometheus)`,`Easy to detect a down target. Central control over what is scraped.`,`Needs service discovery. Hard for short-lived jobs and across firewalls.`],
+    [`Push (agents)`,`Works across networks and for short jobs`,`Hard to tell a dead host from a quiet one. Collectors can be flooded.`],
+    [`General-purpose database`,`Familiar`,`Poor compression and slow time-range aggregation`],
+    [`TSDB`,`Compression (delta-of-delta, Gorilla), fast aggregation`,`A specialized system to run`]],
+ p:[`<b>Cardinality explosion:</b> labels such as user ID create millions of series.`,`Alert fatigue: tune thresholds, add durations, group related alerts.`,`Monitor the monitoring system from outside it.`,`Build vs buy: many teams use managed services.`]},
+'v2-6':{
+ o:`<p>Ad click aggregation turns about 1B clicks a day (about 10k QPS, peaking at 50k) into per-ad counts every minute and top-N ads. <strong>It drives billing, so correctness is critical</strong>. Over-counting or under-counting is money.</p><p>The design is a streaming pipeline built around Kafka and MapReduce-style aggregation. It keeps <em>both</em> the raw and the aggregated data, so results can be recalculated and reconciled.</p>`,
+ w:[`Log watchers send raw click events to <b>Kafka</b>.`,
+    `The aggregation service runs a DAG: <b>map</b> (partition by ad_id), <b>aggregate</b> (count per minute), <b>reduce</b> (top-N).`,
+    `Results go to a second Kafka topic, and a database writer stores them in the aggregation database.`,
+    `Raw events are also stored so they can be replayed.`,
+    `A daily batch job <b>reconciles</b> the streaming results against the raw data.`],
+ t:[[`Lambda`,`Batch results are an accurate backstop`,`Two codebases that must agree`],
+    [`Kappa`,`One streaming codebase. Reprocess by replay.`,`Relies entirely on the stream engine being correct`],
+    [`Event time`,`Accurate counts`,`Late data means watermarks and extra latency`],
+    [`Processing time`,`Simple and low latency`,`Inaccurate when events arrive late or out of order`]],
+ p:[`Exactly-once: commit offsets together with results (atomically or transactionally), and dedupe by event ID.`,`Hot ads (large advertisers) need extra aggregation nodes.`,`Snapshot operator state for fault tolerance.`,`Monitor end-to-end latency and consumer lag.`]},
+'v2-7':{
+ o:`<p>Hotel booking has <strong>low transaction volume</strong> (a few bookings per second across 5,000 hotels) but <strong>strict correctness</strong>: no double-booking, and every payment matched to a reservation. Guests reserve a <em>room type</em>, not a specific room, and hotels may deliberately overbook by around 10%.</p><p>Most of the interview is about <strong>concurrency control</strong> and <strong>idempotency</strong>.</p>`,
+ w:[`The guest browses the hotel and room types and picks dates.`,
+    `The reservation page generates a <b>reservation_id</b> up front. This is the idempotency key.`,
+    `On submit, the reservation service checks the <code>room_type_inventory</code> rows (hotel, type, date, total_inventory, total_reserved) for every night.`,
+    `In one transaction it increments <code>total_reserved</code>, subject to the inventory limit (plus any overbooking allowance).`,
+    `Payment is processed, and the status moves from pending to paid (or to cancelled or refunded).`],
+ t:[[`Pessimistic locking`,`Prevents conflicts outright`,`Contention and deadlock risk. Poor scaling.`],
+    [`Optimistic locking (version column)`,`Fast when conflicts are rare`,`Many retries when contention is high`],
+    [`Database constraint`,`Simple, enforced by the database`,`Hard to express complex rules. Retries when contention is high.`],
+    [`One shared database`,`ACID across tables`,`Couples the services together`],
+    [`Database per microservice`,`Independent services`,`Needs a saga or 2PC for consistency across services`]],
+ p:[`Shard by hotel_id.`,`An inventory cache speeds up reads, but the database constraint makes the final decision.`,`Double submission: the unique reservation_id rejects duplicates.`,`Holds and timeouts: release inventory if payment never completes.`]},
+'v2-8':{
+ o:`<p>Traditional mail servers (SMTP plus IMAP over local Maildir files) don't scale to a billion users. A modern email service splits the work into <strong>stateless web and SMTP tiers</strong>, <strong>queues</strong>, and <strong>specialized storage</strong>: metadata, attachments and a search index.</p><p>The requirements are reliability (never lose mail), availability, scalability, and flexibility, such as HTTP APIs and WebSocket for real-time updates.</p>`,
+ w:[`<b>Send:</b> client → load balancer → rate limiter → web servers (validation, same-domain shortcut) → outgoing queue → SMTP workers (spam and virus checks) → the recipient's MX server.`,
+    `<b>Receive:</b> SMTP servers → incoming queue → processing workers (spam, virus, rules).`,
+    `Metadata goes to the metadata database, attachments to object storage, and recent mail to a cache.`,
+    `If the recipient is online, the change is pushed over WebSocket. Otherwise it is fetched on the next sync.`],
+ t:[[`Relational metadata`,`Rich queries`,`Hard to scale to billions of mailboxes`],
+    [`Wide-column, partitioned by user_id`,`Scales, and fast per-user access`,`Denormalization is needed (read and unread kept as separate tables)`],
+    [`Elasticsearch for search`,`Feature-rich, off the shelf`,`Another system to keep in sync`],
+    [`Custom per-user index`,`Tailored to heavy writes`,`Large engineering investment`]],
+ p:[`Consistency: a single leader per mailbox, favoring correctness over availability.`,`Deliverability: warm up IPs gradually, handle feedback loops, set SPF, DKIM and DMARC.`,`Threading uses headers such as In-Reply-To and References.`,`Large attachments need upload limits and scanning.`]},
+'v2-9':{
+ o:`<p>Object storage (S3) stores immutable blobs addressed by bucket and key. It trades the POSIX semantics of file storage and the low latency of block storage for <strong>huge scale, durability and low cost</strong>. Example targets: 100 PB of data, 6 nines of durability, 4 nines of availability.</p><p>The central design choice is to <strong>separate the metadata store from the data store</strong>, like an inode and its data blocks. Each then scales and is optimized for its own access pattern.</p>`,
+ w:[`The API service (stateless) authenticates each request with IAM.`,
+    `<b>PUT object:</b> the data store saves the bytes and returns a UUID. The metadata store records (bucket, object name) → UUID.`,
+    `The data store's <b>placement service</b> tracks data nodes through heartbeats and a virtual cluster map, and chooses replicas across failure domains.`,
+    `The primary data node writes the data and replicates it to secondaries before acknowledging, or acknowledges earlier if eventual durability is acceptable.`,
+    `<b>GET object:</b> the metadata lookup maps the name to a UUID, and the data store fetches by UUID.`],
+ t:[[`3× replication`,`Simple, fast reads and repairs`,`200% storage overhead`],
+    [`Erasure coding (for example 8+4)`,`About 50% overhead with similar or better durability`,`CPU and network cost to encode and rebuild. Slower reads.`],
+    [`Acknowledge after all replicas`,`Strong durability`,`Higher latency`],
+    [`Pack small objects into large files`,`Far fewer files and inodes`,`Needs compaction and garbage collection for deletes`]],
+ p:[`Durability depends on independent failure domains (disk, rack, availability zone) and how fast repairs happen.`,`Checksums on objects and segments catch silent corruption.`,`Listing by prefix across metadata shards is hard. A denormalized listing table helps.`,`Multipart uploads leave orphaned parts that need garbage collection.`,`For a real open-source example of all of this, see Ceph: RADOS + RGW.`]},
+'v2-10':{
+ o:`<p>A leaderboard ranks players by score in real time. It needs the top 10, a player's rank, and the players around that rank, and it resets each month. Relational databases handle "what is my rank among 25M players?" poorly, because it means a sort or count on every query.</p><p><strong>Redis sorted sets</strong>, implemented with a skip list plus a hash, do every operation in O(log n). That makes them the standard answer.</p>`,
+ w:[`A player wins, and the game service validates the result.`,
+    `The leaderboard service runs <code>ZINCRBY leaderboard_2025_09 1 &lt;user&gt;</code>.`,
+    `The score is also written to a relational database as the durable source of truth.`,
+    `<b>Top 10:</b> <code>ZREVRANGE key 0 9 WITHSCORES</code>, then hydrate the profiles from a cache.`,
+    `<b>Rank:</b> <code>ZREVRANK key user</code>. <b>Neighbors:</b> ZREVRANGE around that rank.`],
+ e:`<b>Sizing:</b> 25M players × about 26 bytes per entry ≈ 650 MB. Even with overhead this fits on a single Redis node, with a replica for failover.`,
+ t:[[`Relational database`,`Durable and familiar`,`Rank queries are too slow at scale`],
+    [`Redis sorted set`,`O(log n) rank, top-N and updates`,`Memory-bound. Needs persistence or a rebuild path.`],
+    [`Shard by score range`,`Top-N stays on one shard`,`Shards can be uneven`],
+    [`Hash shards`,`Balanced`,`Top-N needs scatter-gather`]],
+ p:[`Ties: include a timestamp in the score so earlier achievers rank higher.`,`Monthly reset: use a new key per month.`,`Rebuild from the database if Redis loses its data.`]},
+'v2-11':{
+ o:`<p>A payment system moves money. <strong>Pay-in</strong> takes money from buyers through a payment service provider (PSP). <strong>Pay-out</strong> sends it to sellers. The volume is modest (1M transactions a day ≈ 10 TPS), but <strong>correctness and auditability matter more than throughput</strong>.</p><p>External PSPs are slow and unreliable, and money must never be double-charged or lost. So the design is built on <strong>idempotency, retries, a double-entry ledger and reconciliation</strong>.</p>`,
+ w:[`Checkout creates a payment event. The payment service stores it and runs risk checks.`,
+    `The payment executor calls the PSP, usually through a PSP-hosted payment page, so card data never touches your servers (reducing PCI scope).`,
+    `The PSP returns a token and later sends the final result by <b>webhook</b>.`,
+    `The payment order status is updated, then the wallet (seller balance), then the <b>ledger</b> (append-only, double-entry).`,
+    `A nightly <b>reconciliation</b> compares the ledger with the PSP and bank settlement files.`],
+ t:[[`Synchronous calls`,`Simple`,`Tight coupling, and one slow service blocks the chain`],
+    [`Asynchronous via queues`,`Resilient, services scale independently`,`Eventual consistency, and harder to trace`],
+    [`Immediate retry`,`Fast recovery from brief failures`,`Can overload a struggling service`],
+    [`Exponential backoff with jitter`,`Gives the other service room to recover`,`Takes longer to succeed`]],
+ p:[`Double charges: use an idempotency key on your API and pass one to the PSP.`,`Reconciliation mismatches are either auto-fixable, fixable by hand, or unclassifiable and needing investigation.`,`Some payments stay pending for a long time (PSP risk review), so model that state explicitly.`,`Park messages that keep failing in a dead-letter queue.`]},
+'v2-12':{
+ o:`<p>A digital wallet must support balance transfers at around 1M TPS with <strong>perfect correctness and reproducibility</strong>. Auditors need to know how each balance was reached. An in-memory Redis sharded by account is fast, but it can't move money atomically between shards.</p><p>The chapter compares <strong>distributed transactions</strong> (2PC, TC/C, Saga) with <strong>event sourcing</strong>. Event sourcing turns every change into an immutable event in a log that can be replayed.</p>`,
+ w:[`A <b>command</b> arrives, for example "transfer $1 from A to C".`,
+    `It is validated against the current state (does A have at least $1?).`,
+    `It produces <b>events</b> ("A −$1", "C +$1"), which are appended to the <b>event log</b>.`,
+    `The events are applied to the <b>state</b> (balances). State is always derived from the events.`,
+    `Reads go through <b>CQRS</b> read models built from the event stream.`,
+    `Performance: local file log, mmap, RocksDB for state, periodic snapshots. Reliability: the event log is replicated with <b>Raft</b>.`],
+ t:[[`2PC`,`Strong atomicity, done by the database`,`Locks are held across the network. The coordinator is a single point of failure.`],
+    [`TC/C`,`Application-level. No long-held locks.`,`Every operation needs try, confirm and cancel logic. Out-of-order calls must be handled.`],
+    [`Saga`,`Local transactions only. Suits long flows.`,`Compensation logic. Intermediate states are visible.`],
+    [`Event sourcing`,`Full audit trail, reproducible, can rebuild state at any point in time`,`Complex. Event schemas must evolve carefully.`]],
+ p:[`Every phase must be idempotent.`,`TC/C out-of-order: a cancel can arrive before its try, so record it and ignore the late try.`,`Snapshots bound how long replay takes.`,`Partition by account, and use a saga or TC/C across partitions.`]},
+'v2-13':{
+ o:`<p>An electronic stock exchange accepts orders, <strong>matches</strong> buyers with sellers, and publishes market data. It needs <strong>very low and predictable latency</strong> (p99 matters), fairness, 99.99% availability, and fast recovery.</p><p>High-performance designs put the critical path (order manager → sequencer → matching engine) on <strong>one server</strong>, run single-threaded components pinned to CPU cores, and communicate through shared memory. Everything is <strong>deterministic</strong>, so a replica fed the same events reaches the same state.</p>`,
+ w:[`Broker → <b>client gateway</b> (authentication, validation, rate limiting).`,
+    `→ <b>order manager</b> (risk checks, available-funds check).`,
+    `→ <b>sequencer</b> (stamps an inbound sequence number, which fixes a total order).`,
+    `→ <b>matching engine</b> (price-time priority on the order book) → executions.`,
+    `→ sequencer (outbound) → order manager → gateway → broker.`,
+    `The <b>market data publisher</b> builds order-book and candlestick feeds. The <b>reporter</b> handles compliance.`],
+ t:[[`Services spread over the network`,`Familiar, independently scalable`,`Network hops add latency and jitter`],
+    [`Single server with mmap and a ring buffer`,`Microsecond latency`,`Harder to build and to scale out`],
+    [`Hot-warm replica`,`Fast failover by replaying events`,`A warm standby for every component`],
+    [`Raft cluster`,`Automatic leader election`,`Consensus adds latency`]],
+ p:[`Order book structure: price levels as doubly linked lists plus a map from order ID to node, for O(1) cancels.`,`Determinism: no wall-clock reads or random numbers inside the matching engine.`,`Protect against DDoS by isolating public services and applying rate limits and caching.`,`Market data is often distributed by multicast for fairness.`]}
+};
+
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var content=document.getElementById('content'), toc=document.getElementById('toc');
+var html='', tocHtml='', lastVol=0;
+CH.forEach(function(ch){
+  if(ch.vol!==lastVol){
+    html+='<h2 class="vol" id="vol'+ch.vol+'">Volume '+ch.vol+'</h2>';
+    tocHtml+='<li class="grp">Volume '+ch.vol+'</li>'; lastVol=ch.vol;
+  }
+  tocHtml+='<li><a href="#'+ch.id+'">'+ch.n+'. '+esc(ch.t)+'</a></li>';
+  var x=EX[ch.id]||{}, deep='', flow='';
+  if(x.o) deep+='<h3>The big picture</h3><div class="big">'+x.o+'</div>';
+  if(x.w) flow+='<h3>How it works</h3><ol class="flow">'+x.w.map(function(s){return '<li>'+s+'</li>'}).join('')+'</ol>';
+  if(x.e) flow+='<div class="example">'+x.e+'</div>';
+  if(x.t) flow+='<h3>Trade-offs</h3><div class="tw"><table class="tr"><thead><tr><th>Option</th><th>Pros</th><th>Cons</th></tr></thead><tbody>'+
+    x.t.map(function(r){return '<tr><td>'+r[0]+'</td><td class="pro">'+r[1]+'</td><td class="con">'+r[2]+'</td></tr>'}).join('')+'</tbody></table></div>';
+  if(x.p) flow+='<h3>Pitfalls &amp; follow-up questions</h3><ul class="pits">'+x.p.map(function(s){return '<li>'+s+'</li>'}).join('')+'</ul>';
+  html+='<article class="chap" id="'+ch.id+'"><span class="num">Vol. '+ch.vol+' · Chapter '+ch.n+'</span><h2>'+esc(ch.t)+'</h2><p class="gist">'+esc(ch.g)+'</p>'+
+    '<div class="deep">'+deep+'</div>'+
+    '<h3>Key concepts</h3><dl class="concepts">'+ch.c.map(function(x){return '<dt>'+x[0]+'</dt><dd>'+x[1]+'</dd>'}).join('')+'</dl>'+
+    '<div class="deep">'+flow+'</div>'+
+    '<h3>Acronyms</h3><div class="chips">'+ch.a.map(function(x){return '<span class="chip"><b>'+x[0]+'</b>'+x[1]+'</span>'}).join('')+'</div>'+
+    '<details class="sonic"><summary>How this relates to SONiC</summary><div class="body">'+ch.s+'</div></details></article>';
+});
+content.innerHTML=html; toc.innerHTML=tocHtml+'<li class="grp">Reference</li><li><a href="#glossary">A–Z acronyms</a></li>';
+
+// Glossary
+var map={};
+CH.forEach(function(ch){ch.a.forEach(function(x){
+  var k=x[0]; if(!map[k]) map[k]={exp:x[1],ch:[]};
+  if(map[k].ch.indexOf(ch)===-1) map[k].ch.push(ch);
+})});
+var keys=Object.keys(map).sort(function(a,b){return a.replace(/[^A-Za-z0-9]/g,'').toLowerCase().localeCompare(b.replace(/[^A-Za-z0-9]/g,'').toLowerCase())});
+var letters={}, rows='';
+keys.forEach(function(k){
+  var L=k.replace(/[^A-Za-z0-9]/g,'').charAt(0).toUpperCase(); L=/[A-Z]/.test(L)?L:'#';
+  var anchor=''; if(!letters[L]){letters[L]=1; anchor=' id="L-'+L+'"';}
+  rows+='<tr'+anchor+'><td>'+k+'</td><td>'+map[k].exp+'</td><td>'+map[k].ch.map(function(c){return '<a href="#'+c.id+'">V'+c.vol+'·'+c.n+'</a>'}).join(', ')+'</td></tr>';
+});
+document.getElementById('gloss').innerHTML=rows;
+document.getElementById('letters').innerHTML=Object.keys(letters).map(function(L){return '<a href="#L-'+L+'">'+L+'</a>'}).join('');
+
+// Filter + toggle
+var arts=[].slice.call(document.querySelectorAll('article.chap'));
+var count=document.getElementById('count'), empty=document.getElementById('empty');
+function update(){
+  var q=document.getElementById('q').value.trim().toLowerCase(), n=0;
+  arts.forEach(function(a){var hit=!q||a.textContent.toLowerCase().indexOf(q)!==-1; a.classList.toggle('hidden',!hit); if(hit)n++;});
+  ['vol1','vol2'].forEach(function(id){var h=document.getElementById(id);var v=id.slice(-1);
+    h.classList.toggle('hidden',!arts.some(function(a){return !a.classList.contains('hidden')&&a.id.indexOf('v'+v+'-')===0}));});
+  count.textContent=n+' of '+arts.length+' chapters';
+  empty.classList.toggle('hidden',n>0);
+}
+document.getElementById('q').addEventListener('input',update);
+var tbtn=document.getElementById('toggleSonic');
+tbtn.addEventListener('click',function(){
+  var open=tbtn.getAttribute('aria-pressed')!=='true';
+  document.querySelectorAll('details.sonic').forEach(function(d){d.open=open});
+  tbtn.setAttribute('aria-pressed',open?'true':'false');
+  tbtn.textContent=open?'Hide all SONiC notes':'Show all SONiC notes';
+});
+var cbtn=document.getElementById('toggleCompact');
+function setCompact(on){
+  document.body.classList.toggle('compact',on);
+  cbtn.setAttribute('aria-pressed',on?'true':'false');
+  cbtn.textContent=on?'Full view':'Compact view';
+  try{localStorage.setItem('kc-compact',on?'1':'0')}catch(e){}
+}
+cbtn.addEventListener('click',function(){setCompact(!document.body.classList.contains('compact'))});
+try{if(localStorage.getItem('kc-compact')==='1') setCompact(true);}catch(e){}
+update();
+
+// Theme
+(function(){
+  var K='about-sonic-theme';
+  try{var t=localStorage.getItem(K); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){}
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var c=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    var n=c==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',n);
+    try{localStorage.setItem(K,n)}catch(e){}
+  });
+})();
+</script>
+</body>
+</html>

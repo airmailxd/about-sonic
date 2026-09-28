@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SONiC vs Ceph</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f3f1ec; --text:#1d1c1a; --muted:#5f5b53;
+  --border:#e2ded5; --accent:#2f5d8a; --accent-soft:#e6eef6; --ceph:#b0413e; --ceph-soft:#f7e6e4;
+  --ok:#2d7a4b; --ok-soft:#e5f2ea; --warn:#9a5b12; --warn-soft:#f8eddd;
+  --code-bg:#f1efe9; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+    --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ceph:#e8908b; --ceph-soft:#3a2322;
+    --ok:#7cc79a; --ok-soft:#1f3328; --warn:#e0a860; --warn-soft:#3a2d1b; --code-bg:#2a2925; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+  --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ceph:#e8908b; --ceph-soft:#3a2322;
+  --ok:#7cc79a; --ok-soft:#1f3328; --warn:#e0a860; --warn-soft:#3a2d1b; --code-bg:#2a2925; --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.87em;background:var(--code-bg);padding:.1em .35em;border-radius:4px;word-break:break-word}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.topbar{border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar .wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;font-size:.92rem}
+.topbar a{text-decoration:none;color:var(--muted)}
+.topbar a.active{color:var(--text);font-weight:600}
+.topbar .brand{font-weight:700;color:var(--text);margin-right:auto;text-decoration:none}
+header{padding:44px 0 22px}
+header h1{font-size:clamp(1.8rem,4vw,2.5rem);line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+header p{color:var(--muted);margin:0 0 10px;max-width:74ch}
+.kicker{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.note{font-size:.88rem;color:var(--muted);border:1px dashed var(--border);border-radius:8px;padding:8px 12px;max-width:74ch}
+.layout{display:grid;grid-template-columns:210px 1fr;gap:32px;align-items:start}
+nav.side{position:sticky;top:16px;font-size:.88rem;border-left:2px solid var(--border);padding-left:14px}
+nav.side ol{list-style:none;margin:0;padding:0}
+nav.side li{margin:3px 0}
+nav.side a{text-decoration:none;color:var(--muted)}
+nav.side a:hover{color:var(--accent)}
+@media (max-width:820px){.layout{grid-template-columns:1fr}nav.side{position:static;border-left:none;padding-left:0}}
+section{padding:26px 0 30px;border-top:1px solid var(--border)}
+section:first-child{border-top:none;padding-top:0}
+h2{font-size:1.5rem;margin:0 0 6px}
+.lede{color:var(--muted);margin:0 0 18px;max-width:75ch}
+h3{font-size:1.08rem;margin:20px 0 8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow)}
+.card h4{margin:0 0 6px;font-size:1rem}
+.card p{margin:0 0 6px}
+.card p:last-child{margin:0}
+.card.s{border-top:3px solid var(--accent)}
+.card.c{border-top:3px solid var(--ceph)}
+.lbl{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.lbl.s{color:var(--accent)} .lbl.c{color:var(--ceph)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);margin:10px 0}
+table{border-collapse:collapse;width:100%;min-width:700px;font-size:.91rem}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--border)}
+thead th{background:var(--surface-2);font-weight:600}
+thead th.s{color:var(--accent)} thead th.c{color:var(--ceph)}
+tbody th{font-weight:600;background:var(--surface-2);width:18%}
+tr:last-child td,tr:last-child th{border-bottom:none}
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;overflow-x:auto;margin:10px 0}
+.diagram svg{display:block;width:100%;min-width:720px;height:auto}
+.sim{display:grid;grid-template-columns:1fr auto 1fr;gap:8px 12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:8px 0}
+.sim .l{color:var(--accent);font-weight:600}
+.sim .r{color:var(--ceph);font-weight:600;text-align:right}
+.sim .eq{color:var(--muted);font-size:.9rem}
+.sim p{grid-column:1/-1;margin:0;color:var(--muted);font-size:.93rem}
+@media (max-width:560px){.sim{grid-template-columns:1fr}.sim .r{text-align:left}.sim .eq{display:none}}
+.idea{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:10px 0}
+.idea h4{margin:0 0 4px;font-size:1rem}
+.idea p{margin:0 0 6px}
+.idea .how{font-size:.9rem;color:var(--muted)}
+.fit{display:inline-block;font-size:.72rem;font-weight:600;border-radius:999px;padding:1px 9px;margin-left:6px;vertical-align:2px}
+.fit.hi{background:var(--ok-soft);color:var(--ok)} .fit.md{background:var(--warn-soft);color:var(--warn)}
+.irr{border-left:3px solid var(--ceph);background:var(--ceph-soft);border-radius:0 10px 10px 0;padding:14px 16px;margin:10px 0}
+.irr h4{margin:0 0 6px}
+.irr p{margin:0 0 6px}
+.irr .why{font-size:.92rem}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:6px 12px;font:inherit;font-size:.88rem;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.dd-tools{display:flex;gap:8px;margin:0 0 10px}
+details.dd{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:8px 0;box-shadow:var(--shadow)}
+details.dd summary{cursor:pointer;padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;list-style:none}
+details.dd summary::-webkit-details-marker{display:none}
+details.dd summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+details.dd[open] summary::before{transform:rotate(90deg)}
+details.dd[open] summary{border-bottom:1px solid var(--border)}
+.dq{font-weight:600;margin-right:auto}
+.chip{font-size:.78rem;border-radius:999px;padding:2px 10px;font-weight:600}
+.chip.s{background:var(--accent-soft);color:var(--accent)}
+.chip.c{background:var(--ceph-soft);color:var(--ceph)}
+.dd-body{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 16px}
+@media (max-width:760px){.dd-body{grid-template-columns:1fr}}
+.side{border-radius:8px;padding:12px 14px;background:var(--surface-2)}
+.side.s{border-top:3px solid var(--accent)} .side.c{border-top:3px solid var(--ceph)}
+.side h5{margin:0 0 6px;font-size:.95rem}
+.side.s h5{color:var(--accent)} .side.c h5{color:var(--ceph)}
+.side p{margin:0 0 8px;font-size:.94rem}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.9rem}
+@media (max-width:460px){.pc{grid-template-columns:1fr}}
+.pc ul{margin:4px 0 0;padding-left:18px}
+.pc li{margin:2px 0}
+b.pro{color:var(--ok)} b.con{color:var(--ceph)}
+.ev{font-size:.84rem;color:var(--muted);margin:8px 0 0!important}
+.bl{grid-column:1/-1;margin:0;padding:10px 14px;border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:0 8px 8px 0;font-size:.94rem}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+footer{padding:28px 0 60px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--border);margin-top:20px}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:10;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 14px;font:inherit;font-size:.85rem;cursor:pointer}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.s-box{fill:var(--surface-2);stroke:var(--border)}
+.s-sdb{fill:var(--accent-soft);stroke:var(--accent)}
+.s-cdb{fill:var(--ceph-soft);stroke:var(--ceph)}
+.s-hw{fill:var(--surface);stroke:var(--muted);stroke-dasharray:4 3}
+.s-t{fill:var(--text);font-size:12px;font-weight:600}
+.s-m{fill:var(--muted);font-size:10.5px}
+.s-h{font-size:13px;font-weight:700;letter-spacing:.04em}
+.s-h.s{fill:var(--accent)} .s-h.c{fill:var(--ceph)}
+.s-line{stroke:var(--muted);stroke-width:1.3;fill:none}
+.s-arrow{fill:var(--muted)}
+.s-div{stroke:var(--border);stroke-width:1}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a class="brand" href="index.html">About SONiC</a>
+  <a href="index.html">Home</a>
+  <a href="SONiC_Guide.html">SONiC Guide</a>
+  <a href="Key_Concepts.html">Key Concepts</a>
+  <a href="System_Design_QA.html">System Design Q&amp;A</a>
+  <a class="active" href="SONiC_vs_Ceph.html">SONiC vs Ceph</a>
+  <a href="https://github.com/sonic-net/SONiC/blob/master/README.md">Repo README</a>
+</div></div>
+
+<header><div class="wrap">
+  <span class="kicker">Comparison</span>
+  <h1>SONiC vs Ceph: two open-source answers to vendor lock-in</h1>
+  <p><strong style="color:var(--accent)">SONiC</strong> is an open network operating system for switches. <strong style="color:var(--ceph)">Ceph</strong> is an open distributed storage system that provides object, block and file storage from one cluster. Both were built to replace proprietary appliances with software on commodity hardware, and they made opposite choices on nearly every hard design question. Comparing them is a good way to see how system design trade-offs play out.</p>
+  <p class="note">Sources: SONiC claims link to design docs in <a href="https://github.com/sonic-net/SONiC">sonic-net/SONiC</a> (<code>doc/</code>). The Ceph repository is not in this workspace, so Ceph claims are based on its public architecture documentation (<a href="https://docs.ceph.com/en/latest/architecture/">docs.ceph.com/architecture</a>) and the <a href="https://github.com/ceph/ceph">ceph/ceph</a> project. Check version-specific details against the release you use.</p>
+</div></header>
+
+<div class="wrap layout">
+<nav class="side" aria-label="Contents">
+  <ol>
+    <li><a href="#glance">At a glance</a></li>
+    <li><a href="#arch">Architectures</a></li>
+    <li><a href="#similar">What they do similarly</a></li>
+    <li><a href="#decisions">Contrasting decisions</a></li>
+    <li><a href="#deep-dives">↳ Decision deep dives</a></li>
+    <li><a href="#s-from-c">SONiC could borrow</a></li>
+    <li><a href="#c-from-s">Ceph could borrow</a></li>
+    <li><a href="#irreconcilable">Irreconcilable</a></li>
+    <li><a href="#repos">The repos themselves</a></li>
+    <li><a href="#interview">Interview angle</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- GLANCE -->
+<section id="glance">
+  <h2>At a glance</h2>
+  <div class="pair">
+    <div class="card s"><span class="lbl s">SONiC · one sentence</span><h4>Make one switch programmable</h4><p>It turns routing decisions into hardware forwarding tables on a single box, and it can restart itself while packets keep flowing.</p><p style="color:var(--muted);font-size:.9rem">The data is packets in flight. If state is lost, it is relearned from neighbors.</p></div>
+    <div class="card c"><span class="lbl c">Ceph · one sentence</span><h4>Make thousands of disks act as one</h4><p>It spreads objects across many servers, keeps replicas consistent, and heals itself when disks or hosts fail.</p><p style="color:var(--muted);font-size:.9rem">The data is the user's bytes. If state is lost, it is gone for good.</p></div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th class="s">SONiC</th><th class="c">Ceph</th></tr></thead>
+    <tbody>
+      <tr><th>Domain</th><td>Network operating system for data-center switches (L2/L3)</td><td>Unified distributed storage: object (RGW, S3/Swift), block (RBD), file (CephFS)</td></tr>
+      <tr><th>Origin</th><td>Microsoft for Azure, open-sourced in 2016 through OCP</td><td>Sage Weil's PhD research at UC Santa Cruz (mid-2000s). Later Inktank, then Red Hat, then IBM</td></tr>
+      <tr><th>Governance</th><td>SONiC Foundation (Linux Foundation) and a TSC (<a href="https://github.com/sonic-net/SONiC/blob/master/governance.md">governance.md</a>)</td><td>Ceph Foundation (Linux Foundation) and a Ceph leadership team</td></tr>
+      <tr><th>Unit of deployment</th><td>A whole OS image that owns the switch (installed with ONIE)</td><td>Daemons on general-purpose Linux servers</td></tr>
+      <tr><th>Scope of one instance</th><td>One box (or one chassis/multi-ASIC system)</td><td>One cluster of up to thousands of nodes</td></tr>
+      <tr><th>Data plane</th><td>Fixed-function ASIC hardware, programmed through SAI</td><td>Software on CPUs (OSD daemons), writing to raw devices</td></tr>
+      <tr><th>Core state store</th><td>Redis, in memory</td><td>BlueStore on raw disk, with RocksDB for metadata</td></tr>
+      <tr><th>Coordination</th><td>Shared-database pub/sub inside the box. Routing protocols between boxes</td><td>Paxos-based monitor quorum. Daemons message each other directly</td></tr>
+      <tr><th>Consistency</th><td>Eventual (network convergence)</td><td>Strong for RADOS writes (all replicas acknowledge)</td></tr>
+      <tr><th>Main languages</th><td>C++ (swss, sairedis), Python (CLI, pmon, config), Go (gNMI)</td><td>C++ (core daemons), Python (mgr modules, cephadm), TypeScript (dashboard)</td></tr>
+      <tr><th>License</th><td>Mostly Apache 2.0. Bundled GPL components such as FRR and the Linux kernel</td><td>Mostly LGPL 2.1/3</td></tr>
+      <tr><th>Releases</th><td>Twice a year, named by date (e.g. <code>202405</code>, <code>202411</code>)</td><td>Roughly yearly named stable releases (e.g. Reef, Squid) with point releases</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ARCH -->
+<section id="arch">
+  <h2>Architectures side by side</h2>
+  <p class="lede">Both are collections of role-specific daemons around a source of truth. The difference is <em>where</em> that source of truth lives and <em>how far</em> it reaches.</p>
+  <div class="diagram" role="img" aria-label="Left: SONiC inside one switch, with containers around Redis, orchagent and syncd programming the ASIC. Right: Ceph cluster with clients computing placement via CRUSH and talking directly to OSDs, monitors holding cluster maps via Paxos.">
+    <svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="s-arrow" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <text class="s-h s" x="20" y="26">SONiC: ONE SWITCH</text>
+      <rect class="s-box" x="20" y="40" width="450" height="340" rx="10" style="fill:none"/>
+      <rect class="s-box" x="40" y="60" width="95" height="40" rx="6"/><text class="s-t" x="87" y="84" text-anchor="middle">bgp (FRR)</text>
+      <rect class="s-box" x="145" y="60" width="95" height="40" rx="6"/><text class="s-t" x="192" y="84" text-anchor="middle">teamd</text>
+      <rect class="s-box" x="250" y="60" width="95" height="40" rx="6"/><text class="s-t" x="297" y="84" text-anchor="middle">pmon</text>
+      <rect class="s-box" x="355" y="60" width="95" height="40" rx="6"/><text class="s-t" x="402" y="84" text-anchor="middle">CLI / gNMI</text>
+      <rect class="s-sdb" x="40" y="140" width="410" height="54" rx="8"/><text class="s-t" x="245" y="162" text-anchor="middle">Redis: CONFIG_DB · APPL_DB · ASIC_DB · STATE_DB · COUNTERS_DB</text><text class="s-m" x="245" y="180" text-anchor="middle">in-memory source of truth + pub/sub bus</text>
+      <rect class="s-box" x="60" y="230" width="150" height="44" rx="6"/><text class="s-t" x="135" y="250" text-anchor="middle">orchagent</text><text class="s-m" x="135" y="265" text-anchor="middle">intent → SAI objects</text>
+      <rect class="s-box" x="280" y="230" width="150" height="44" rx="6"/><text class="s-t" x="355" y="250" text-anchor="middle">syncd + vendor SAI</text><text class="s-m" x="355" y="265" text-anchor="middle">closed SDK binary</text>
+      <rect class="s-hw" x="60" y="310" width="370" height="50" rx="8"/><text class="s-t" x="245" y="332" text-anchor="middle">Switch ASIC (data plane in silicon)</text><text class="s-m" x="245" y="348" text-anchor="middle">forwards packets at Tbps, keeps running during warm restart</text>
+      <path class="s-line" d="M87 100 V138" marker-end="url(#ah)"/><path class="s-line" d="M192 100 V138" marker-end="url(#ah)"/><path class="s-line" d="M297 100 V138" marker-end="url(#ah)"/><path class="s-line" d="M402 100 V138" marker-end="url(#ah)"/>
+      <path class="s-line" d="M135 194 V228" marker-end="url(#ah)"/><path class="s-line" d="M210 252 H278" marker-end="url(#ah)"/><path class="s-line" d="M355 274 V308" marker-end="url(#ah)"/>
+
+      <line class="s-div" x1="500" y1="20" x2="500" y2="390"/>
+
+      <text class="s-h c" x="530" y="26">CEPH: A CLUSTER OF SERVERS</text>
+      <rect class="s-box" x="530" y="50" width="130" height="50" rx="6"/><text class="s-t" x="595" y="72" text-anchor="middle">Client / librados</text><text class="s-m" x="595" y="88" text-anchor="middle">computes CRUSH</text>
+      <rect class="s-cdb" x="760" y="50" width="210" height="60" rx="8"/><text class="s-t" x="865" y="72" text-anchor="middle">MON quorum (Paxos)</text><text class="s-m" x="865" y="88" text-anchor="middle">cluster maps + epochs, config DB</text><text class="s-m" x="865" y="102" text-anchor="middle">+ MGR (dashboard, orchestrator)</text>
+      <rect class="s-box" x="530" y="150" width="130" height="44" rx="6"/><text class="s-t" x="595" y="170" text-anchor="middle">RGW · RBD · CephFS</text><text class="s-m" x="595" y="185" text-anchor="middle">S3 / block / file</text>
+      <rect class="s-cdb" x="540" y="240" width="130" height="54" rx="8"/><text class="s-t" x="605" y="262" text-anchor="middle">OSD (primary)</text><text class="s-m" x="605" y="278" text-anchor="middle">BlueStore + RocksDB</text>
+      <rect class="s-cdb" x="700" y="240" width="120" height="54" rx="8"/><text class="s-t" x="760" y="262" text-anchor="middle">OSD (replica)</text><text class="s-m" x="760" y="278" text-anchor="middle">other host</text>
+      <rect class="s-cdb" x="850" y="240" width="120" height="54" rx="8"/><text class="s-t" x="910" y="262" text-anchor="middle">OSD (replica)</text><text class="s-m" x="910" y="278" text-anchor="middle">other rack</text>
+      <rect class="s-hw" x="540" y="320" width="430" height="44" rx="8"/><text class="s-t" x="755" y="340" text-anchor="middle">Commodity servers + disks (data plane in software)</text><text class="s-m" x="755" y="355" text-anchor="middle">durable bytes, checksummed, scrubbed</text>
+      <path class="s-line" d="M660 70 H758" marker-end="url(#ah)"/><text class="s-m" x="672" y="64">get maps</text>
+      <path class="s-line" d="M595 194 V238" marker-end="url(#ah)"/>
+      <path class="s-line" d="M595 100 V148" marker-end="url(#ah)"/>
+      <path class="s-line" d="M670 267 H698" marker-end="url(#ah)"/><path class="s-line" d="M670 280 C 720 310, 820 310, 848 285" marker-end="url(#ah)"/>
+      <text class="s-m" x="640" y="226">direct I/O, no lookup</text>
+      <text class="s-m" x="760" y="232">replicate, ack when all commit</text>
+    </svg>
+  </div>
+  <div class="pair">
+    <div class="card s"><span class="lbl s">SONiC data path</span><p>Protocol daemons write intent into Redis. orchagent turns it into SAI objects, and syncd programs the ASIC. <strong>Packets never touch SONiC software</strong>, except for control traffic sent to the CPU. <a href="SONiC_Guide.html#route">Life of a route →</a></p></div>
+    <div class="card c"><span class="lbl c">Ceph data path</span><p>The client hashes the object name to a placement group (PG). CRUSH maps the PG to an ordered list of OSDs. The client writes to the primary OSD, which replicates the write and acknowledges once every replica has committed. <strong>Every byte passes through Ceph software</strong>, and no central server looks up where data lives.</p></div>
+  </div>
+</section>
+
+<!-- SIMILAR -->
+<section id="similar">
+  <h2>What they do similarly</h2>
+  <p class="lede">Many of the patterns are the same on both sides, even though the two systems solve different problems.</p>
+  <div class="sim"><span class="l">Disaggregation (SAI + white-box switches)</span><span class="eq">≈</span><span class="r">Software-defined storage on commodity servers</span><p>Both exist to separate the software from proprietary hardware appliances, so operators can pick hardware and software independently.</p></div>
+  <div class="sim"><span class="l">One container per feature</span><span class="eq">≈</span><span class="r">One daemon per role (MON, MGR, OSD, MDS, RGW)</span><p>Role-specific processes, each restartable on its own. Both are now deployed as containers (SONiC Docker images; Ceph via cephadm or Rook).</p></div>
+  <div class="sim"><span class="l">CONFIG_DB as the source of truth</span><span class="eq">≈</span><span class="r">Monitor-held cluster maps + central config DB</span><p>Desired state is declared in one authoritative place. Other daemons watch it and reconcile toward it.</p></div>
+  <div class="sim"><span class="l">orchagent reconciliation, warm-restart reconcile</span><span class="eq">≈</span><span class="r">PG peering, recovery, backfill</span><p>Both are control loops. They compare desired state with actual state and repair the difference, and both must handle state that is partially stale after a restart.</p></div>
+  <div class="sim"><span class="l">SAI (vendor-implemented hardware API)</span><span class="eq">≈</span><span class="r">ObjectStore interface (BlueStore, SeaStore), EC plugins</span><p>A pluggable backend behind a stable interface. The difference is who implements it: hardware vendors for SAI, Ceph itself for ObjectStore.</p></div>
+  <div class="sim"><span class="l">ECMP and fine-grained hashing</span><span class="eq">≈</span><span class="r">CRUSH placement</span><p>Both place work with a deterministic hash instead of a lookup table, and both try to minimize movement when a member joins or leaves (<a href="Key_Concepts.html#v1-5">consistent hashing</a>).</p></div>
+  <div class="sim"><span class="l">BGP keepalives, BFD</span><span class="eq">≈</span><span class="r">OSD heartbeats, monitor failure reports</span><p>Failure detection based on heartbeats and timeouts, tuned to avoid flapping.</p></div>
+  <div class="sim"><span class="l">system-health, CRM thresholds</span><span class="eq">≈</span><span class="r"><code>HEALTH_OK/WARN/ERR</code> with named checks</span><p>Many signals rolled up into one health status for operators.</p></div>
+  <div class="sim"><span class="l">gNMI / SNMP / flex counters</span><span class="eq">≈</span><span class="r">MGR Prometheus module, dashboard</span><p>Both expose metrics to external monitoring systems.</p></div>
+  <div class="sim"><span class="l">Redis (in-memory KV)</span><span class="eq">≈</span><span class="r">RocksDB (embedded LSM KV)</span><p>Both put a key-value store at the center of their internal state, but they choose opposite durability profiles.</p></div>
+  <div class="sim"><span class="l">HLD docs, TSC review, workgroups</span><span class="eq">≈</span><span class="r">Design discussions, component leads, CDS/summits</span><p>Open governance under a Linux Foundation-hosted foundation, with vendors both collaborating and competing.</p></div>
+</section>
+
+<!-- DECISIONS -->
+<section id="decisions">
+  <h2>Contrasting design decisions</h2>
+  <p class="lede">The same design question, answered in opposite ways. In each row, the reasoning follows from what the system protects: <em>forwarding continuity</em> for SONiC, <em>data durability</em> for Ceph.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Decision</th><th class="s">SONiC chose… because…</th><th class="c">Ceph chose… because…</th></tr></thead>
+    <tbody>
+      <tr><th>Where state lives</th><td><strong>In memory (Redis).</strong> Almost all state can be recomputed from config plus neighbors, and speed matters more than persistence.</td><td><strong>On disk (BlueStore) with checksums.</strong> The state <em>is</em> the product, so losing it is unacceptable.</td></tr>
+      <tr><th>How components talk</th><td><strong>Through a shared database</strong> (pub/sub tables). Loose coupling, state that is easy to inspect, and simple restarts.</td><td><strong>Direct messaging</strong> (msgr2) between daemons, plus versioned maps. A central database would bottleneck thousands of nodes.</td></tr>
+      <tr><th>Consistency</th><td><strong>Eventual.</strong> The network converges, and a short inconsistency (a microloop) is tolerable.</td><td><strong>Strong.</strong> A write is acknowledged only after every replica commits, so a read never returns lost data.</td></tr>
+      <tr><th>Consensus</th><td><strong>None inside, and none between switches.</strong> Each box decides independently, so failures stay isolated.</td><td><strong>Paxos among monitors.</strong> The whole cluster must agree on one authoritative map.</td></tr>
+      <tr><th>Placement</th><td><strong>Per-flow hash in the ASIC</strong> (ECMP), recomputed at every hop.</td><td><strong>Per-object CRUSH in the client</strong>, aware of failure domains (host, rack, row).</td></tr>
+      <tr><th>Reaction to failure</th><td><strong>Reroute immediately</strong> (milliseconds). Nothing needs copying; you just stop using the failed path.</td><td><strong>Wait, then re-replicate slowly.</strong> A down OSD is only marked <em>out</em> after a timeout (about 10 minutes by default), and recovery is throttled so that moving data does not overwhelm client I/O.</td></tr>
+      <tr><th>Upgrades</th><td><strong>Per-box image swap</strong> with warm or fast reboot. The ASIC keeps forwarding while the software restarts (<a href="SONiC_Guide.html#reliability">reliability</a>).</td><td><strong>Rolling, daemon by daemon</strong>, orchestrated by cephadm. The cluster stays up because replicas cover the daemon that is restarting.</td></tr>
+      <tr><th>Hardware abstraction</th><td><strong>Vendors implement SAI</strong> (often as closed binaries). SONiC cannot build forwarding silicon itself.</td><td><strong>Ceph implements BlueStore itself</strong> on raw block devices. Disks are generic, so Ceph owns the whole stack.</td></tr>
+      <tr><th>Config validation</th><td><strong>YANG models</strong>, JSON Patch with rollback (<a href="https://github.com/sonic-net/SONiC/blob/master/doc/config-generic-update-rollback/SONiC_Generic_Config_Update_and_Rollback_Design.md">GCU</a>). Standard models help with multi-vendor automation.</td><td><strong>Typed options in the monitor config DB</strong> (<code>ceph config set</code>), with per-daemon overrides. One implementation, so a custom schema is sufficient.</td></tr>
+      <tr><th>Scale strategy</th><td><strong>Scale out the network</strong>: add more switches (Clos). Each SONiC instance stays small.</td><td><strong>Scale out the cluster</strong>: add more OSDs to one logical system. A single instance can grow to exabytes.</td></tr>
+      <tr><th>Threading model</th><td>orchagent is a single-threaded event loop. Simple and deterministic, with <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bgp_loading_optimization/bgp-loading-optimization-hld.md">known throughput limits</a>.</td><td>The classic OSD uses thread pools. <em>Crimson</em> (Seastar) moves to a shard-per-core design for NVMe speeds.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="deep-dives">Decision deep dives</h3>
+  <p class="lede" style="margin-bottom:10px">Open any decision to see why each project chose what it did, the pros and cons on both sides, and where to find the evidence in each codebase. Ceph source paths refer to the <code>ceph/ceph</code> monorepo.</p>
+  <div class="dd-tools"><button class="btn" id="ddOpen" type="button">Expand all</button><button class="btn" id="ddClose" type="button">Collapse all</button></div>
+
+  <details class="dd"><summary><span class="dq">1. Where does state live?</span><span class="chip s">SONiC: in-memory Redis</span><span class="chip c">Ceph: on-disk BlueStore + RocksDB</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>Almost everything in a switch's state is <em>derived</em>. It comes from persisted config (<code>config_db.json</code>), from protocols relearning routes and neighbors, and from rediscovering the hardware. Redis started as a fast in-memory hub for passing data between processes, and route programming needs a high write rate. The durable truth lives elsewhere: in the config file, in neighboring routers, and in the operator's controller.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Very fast reads and writes</li><li>Easy to inspect with <code>redis-cli</code></li><li>A restart gives a clean slate, so corrupted state doesn't survive a reboot</li></ul></div><div><b class="con">Cons</b><ul><li>Limited by memory on switch CPUs, which are often small</li><li>One Redis instance becomes a hot spot under route churn</li><li>Persistence has to be built specially: warm reboot needs explicit save and restore</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/database/multi_database_instances.md">multi_database_instances.md</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/SONiC_Warmboot.md">SONiC_Warmboot.md</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>The data <em>is</em> the product. Ceph's earlier backend, FileStore, sat on top of a local filesystem (usually XFS) and paid for it twice: every write went to a journal and then to the filesystem, and POSIX semantics added overhead. BlueStore replaced it by writing data <em>directly to the raw device</em> and keeping metadata in RocksDB (on BlueFS), with checksums on every block and optional inline compression.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Durable, with end-to-end checksums that catch bit rot</li><li>No double-write penalty for large writes</li><li>Efficient copy-on-write clones for RBD snapshots</li></ul></div><div><b class="con">Cons</b><ul><li>Owning a storage engine is a huge, long-term engineering commitment</li><li>RocksDB compaction causes latency spikes</li><li>Memory tuning (<code>osd_memory_target</code>) matters a lot</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/os/bluestore/</code> · <code>src/kv/</code> (RocksDB wrapper)</p></div>
+    <p class="bl"><b>Bottom line:</b> each project chose based on whether losing the state is recoverable or catastrophic.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">2. How do components communicate?</span><span class="chip s">SONiC: shared-DB pub/sub</span><span class="chip c">Ceph: direct messaging + maps</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>SONiC combines components from many teams and vendors, written in C++, Python and Go. A shared database is a language-neutral contract: any daemon can crash, restart and resync by reading its tables, with no need to track its peers. The producer/consumer table library in <code>sonic-swss-common</code> standardizes the pattern. When Redis became too slow on hot paths, the project added a ZMQ channel rather than giving up the model.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Loose coupling and independent restarts</li><li>All state can be observed in one place</li><li>Works across languages</li></ul></div><div><b class="con">Cons</b><ul><li>An extra hop and serialization on every update</li><li>Redis becomes a bottleneck</li><li>Table schemas are implicit contracts that drift (YANG was added later)</li><li>No ordering across tables, so orchagent has to handle dependencies</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-swss-common/ZMQ%20producer-consumer%20state%20table%20design.md">ZMQ producer/consumer</a> · <a href="SONiC_Guide.html#databases">SONiC Guide: databases</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>With thousands of daemons, a central database on the data path would be a bottleneck and a single point of failure. OSDs talk to each other directly for replication, heartbeats and recovery. The only centralized pieces are the small, versioned <em>cluster maps</em> held by the monitors. Messaging goes through the async messenger (msgr2 protocol, with optional encryption and compression).</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Scales horizontally</li><li>No central bottleneck on the data path</li><li>Low latency</li></ul></div><div><b class="con">Cons</b><ul><li>Live state is spread across daemon memory, so debugging means admin sockets and dumps</li><li>Wire-protocol compatibility must be managed across versions</li><li>A client with an old map epoch must fetch the new map and retry</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/msg/async/</code> · <code>src/mon/</code> (map services)</p></div>
+    <p class="bl"><b>Bottom line:</b> a shared bus is the best choice inside one box and the worst choice across thousands.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">3. What consistency model?</span><span class="chip s">SONiC: eventual</span><span class="chip c">Ceph: strong</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>IP networks are eventually consistent by nature. Each router converges on its own, and packets keep flowing on the old state while the new state is installed. Blocking until everything agrees would <em>drop</em> packets. Inside the box, orchagent writes to ASIC_DB asynchronously by default to maximize throughput. Synchronous mode was added later so that hardware failures reach the caller.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Maximum availability and throughput</li><li>Degrades gracefully</li></ul></div><div><b class="con">Cons</b><ul><li>Transient microloops and blackholes</li><li>BGP can advertise routes that aren't in hardware yet</li><li>It's hard to know when a change is "done"</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/synchronous-mode/synchronous-mode-cfg.md">synchronous mode</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/BGP/BGP-supress-fib-pending.md">suppress FIB pending</a> (closes the advertise-before-install gap)</p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>Storage consumers such as databases on RBD volumes and applications on CephFS assume read-after-write consistency, and CephFS needs near-POSIX semantics. Ceph uses <em>primary-copy replication</em>. The primary OSD for a placement group orders every write, and the client is acknowledged only after all replicas in the acting set have committed.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>A simple model for clients</li><li>No write conflicts to resolve</li><li>Safe for databases</li></ul></div><div><b class="con">Cons</b><ul><li>Write latency is set by the slowest replica</li><li>I/O blocks when a PG has fewer than <code>min_size</code> replicas</li><li>Strong consistency across sites is too slow, so multi-site RGW and RBD mirroring are asynchronous</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/osd/PrimaryLogPG.*</code> · <code>src/osd/PeeringState.*</code></p></div>
+    <p class="bl"><b>Bottom line:</b> CAP in practice. SONiC chooses availability because a dropped packet is retried anyway. Ceph chooses consistency because a lost write is permanent.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">4. Is there consensus?</span><span class="chip s">SONiC: none</span><span class="chip c">Ceph: Paxos (MON quorum)</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>Each switch runs independently, so a software bug or bad config affects one box, not the fabric. Routing protocols reach agreement on reachability <em>without</em> a quorum. Fleet-wide intent lives in the operator's controllers. Where two boxes do need to coordinate (MCLAG, dual ToR), they use targeted protocols between exactly two peers.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>No quorum to lose</li><li>Failures stay isolated to one box</li><li>Simpler software</li></ul></div><div><b class="con">Cons</b><ul><li>No global view from inside SONiC</li><li>Fleet coordination must be built externally</li><li>Peer pairs can split-brain and need specific mitigations</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/mclag/Sonic-mclag-hld.md">MCLAG (ICCP)</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/dualtor/dualtor_active_standby_hld.md">dual ToR</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>Ceph needs <em>one</em> authoritative answer to "which OSDs are up, and where does each PG live?" Without it, two OSDs could both act as primary and accept divergent writes. Monitors (usually 3 or 5) agree on the maps using Paxos. The maps are small and change rarely, and data I/O never goes through the monitors, so the cost of consensus is acceptable.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>A single source of truth</li><li>Safe failover decisions</li><li>Split-brain protection for data</li></ul></div><div><b class="con">Cons</b><ul><li>A majority of monitors must be up</li><li>The monitor store grows during long recoveries</li><li>Monitor placement needs care</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/mon/Paxos.*</code> · <code>src/mon/OSDMonitor.*</code></p></div>
+    <p class="bl"><b>Bottom line:</b> SONiC avoids shared fate between switches, and Ceph needs a shared truth about where data lives. Both are right for their domain.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">5. How is work placed?</span><span class="chip s">SONiC: ECMP hash in the ASIC</span><span class="chip c">Ceph: CRUSH in the client</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>The forwarding decision is made per packet, in nanoseconds, in silicon. Only a local, stateless hash is fast enough. The hash fields and algorithms are features of the ASIC, which SONiC exposes through SAI. Fine-grained ECMP was added to limit flow reshuffling when members change.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Zero lookup latency</li><li>Stateless</li><li>Scales with the hardware</li></ul></div><div><b class="con">Cons</b><ul><li>Hash polarization across tiers</li><li>Large "elephant" flows collide, so load is uneven</li><li>Limited control. Membership changes reshuffle flows unless resilient hashing is used.</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/hash/hash-design.md">hash design</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/ecmp/fine_grained_next_hop_hld.md">fine-grained ECMP</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>A central lookup table for billions of objects would be a bottleneck and a single point of failure. With CRUSH, any client computes where an object lives from the cluster map alone. The map encodes the hierarchy (host, rack, row, data center), device weights and rules such as "3 replicas in different racks". <em>Placement groups</em> add a layer of indirection, so rebalancing moves whole PGs instead of individual objects.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>No lookup bottleneck</li><li>Aware of failure domains</li><li>Deterministic and decentralized</li></ul></div><div><b class="con">Cons</b><ul><li>Statistical imbalance, so a balancer (upmap) is needed</li><li>PG counts need tuning (the autoscaler helps)</li><li>Map changes trigger data movement, and exact placement is hard to reason about by hand</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/crush/</code> · <code>src/pybind/mgr/balancer/</code> · <code>src/pybind/mgr/pg_autoscaler/</code></p></div>
+    <p class="bl"><b>Bottom line:</b> both avoid lookup tables. SONiC computes per packet with no memory of past decisions, while Ceph computes per object and follows the cluster's topology.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">6. How do they react to failure?</span><span class="chip s">SONiC: reroute now</span><span class="chip c">Ceph: wait, then heal slowly</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>Losing a path loses no data. The faster traffic stops using a dead link, the fewer packets are dropped. BFD detects failures in under a second, the ASIC removes the ECMP member, and prefix-independent convergence (PIC) avoids reprogramming every route.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Recovery in under a second</li><li>No data to move</li></ul></div><div><b class="con">Cons</b><ul><li>Flapping links cause churn, so damping is needed</li><li>Aggressive timers raise the risk of false positives</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/pic/bgp_pic_arch_doc.md">BGP PIC</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/link_event_damping/Link-event-damping-HLD.md">link event damping</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>Moving data is expensive and risky, and most failures are transient, such as a reboot or a brief network blip. An OSD is marked <em>down</em> quickly, and I/O moves to the surviving replicas. It is only marked <em>out</em>, which triggers re-replication, after a timeout. Recovery and backfill are throttled so they don't starve client I/O. Operators set <code>noout</code> during maintenance.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Avoids moving terabytes needlessly</li><li>Client performance is protected during recovery</li></ul></div><div><b class="con">Cons</b><ul><li>The cluster runs degraded (fewer copies) during the wait, so a second failure is riskier</li><li>Many throttles to tune</li><li>Recovering large disks takes hours to days</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/osd/</code> (recovery and backfill) · <code>src/common/options/</code> (for example <code>mon_osd_down_out_interval</code>, <code>osd_max_backfills</code>)</p></div>
+    <p class="bl"><b>Bottom line:</b> the cost of reacting sets the speed. Rerouting is nearly free, so SONiC reacts at once. Re-replication is expensive, so Ceph waits.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">7. How are upgrades done?</span><span class="chip s">SONiC: per-box image swap + warm reboot</span><span class="chip c">Ceph: rolling daemon restarts</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>A switch has no redundancy <em>inside</em> itself to hide a restart. The choices are to shift traffic away (TSA) and reboot, or to use warm reboot, which keeps the ASIC forwarding while the software restarts. Swapping the whole image (A/B images, <code>sonic-installer</code>) makes each version an atomic unit that is easy to roll back.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Atomic versions</li><li>Roll back by booting the previous image</li><li>Hitless when warm reboot works</li></ul></div><div><b class="con">Cons</b><ul><li>Warm reboot is complex, and every feature must support save, restore and reconcile</li><li>Fragile for some feature combinations</li><li>A one-line fix still means shipping a whole image</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/open_issues.md">warm-reboot open issues</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/voq/Reliable_TSA.md">Reliable TSA</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/fast-reboot/Fast-reboot_Flow_Improvements_HLD.md">fast reboot</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>A Ceph cluster is redundant by design, so one daemon at a time can restart while its peers carry the load. The upgrade order is monitors, then managers, then OSDs, then MDS and RGW. cephadm automates it and checks <code>ok-to-stop</code> first. Daemons at N and N−1 interoperate during the upgrade window, negotiated through feature bits.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>No downtime</li><li>Fine-grained</li><li>Uses redundancy the cluster already has</li></ul></div><div><b class="con">Cons</b><ul><li>Mixed-version windows need compatibility code</li><li>Large clusters take a long time to upgrade</li><li>Each OSD restart causes peering and brief latency blips</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/cephadm/</code> · <code>src/pybind/mgr/cephadm/</code> (upgrade logic) · <code>qa/suites/upgrade/</code></p></div>
+    <p class="bl"><b>Bottom line:</b> a system with no internal redundancy has to make restarts hitless (warm reboot). A system with redundancy can simply restart a piece at a time.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">8. How is hardware abstracted?</span><span class="chip s">SONiC: vendors implement SAI</span><span class="chip c">Ceph: owns the storage engine</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>Switch ASICs are proprietary, and vendors will not open their SDKs. SAI, standardized through OCP, gives SONiC a stable C API while vendors keep their IP. This is what made a multi-vendor, open network OS commercially possible.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Portability across vendors</li><li>A competitive hardware market</li><li>Vendors invest in their own SAI implementations</li></ul></div><div><b class="con">Cons</b><ul><li>A lowest-common-denominator API, plus vendor extensions</li><li>Bugs in closed binaries are hard to debug</li><li>Behavior varies by platform, so conformance testing is needed</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/SAI_failure_handling/SAI_failure_handling.md">SAI failure handling</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/tsc/conformance/sonic_conformance_guideline.md">conformance guideline</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>Disks and SSDs are commodity parts with standard, open interfaces (block devices, NVMe). The value is in the storage engine, and owning it lets Ceph guarantee durability and tune performance. For very fast NVMe, Ceph is building a new engine (SeaStore) and a new OSD (Crimson) rather than depending on vendors.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Full control</li><li>Consistent behavior on any hardware</li><li>Open to debug end to end</li></ul></div><div><b class="con">Cons</b><ul><li>A huge engineering burden</li><li>Using hardware offloads (DPUs, computational storage) needs per-vendor work</li><li>Rewrites take years</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/os/ObjectStore.h</code> · <code>src/crimson/</code> · <code>src/erasure-code/</code> (plugin interface)</p></div>
+    <p class="bl"><b>Bottom line:</b> each project abstracts the layer it can't control (SONiC) or chooses to own (Ceph).</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">9. How is configuration modeled?</span><span class="chip s">SONiC: YANG + JSON Patch</span><span class="chip c">Ceph: typed options in the MON config DB</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>Network operators expect industry-standard models (YANG, OpenConfig, gNMI and NETCONF) for automation that spans several vendors. CONFIG_DB's schema was loose at first, which allowed bad writes. YANG validation was added to reject them, and Generic Config Update made partial changes safe and reversible.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Interoperable</li><li>Machine-validated</li><li>A large tooling ecosystem</li></ul></div><div><b class="con">Cons</b><ul><li>YANG is verbose and complex</li><li>Models must stay in sync with how the tables are really used</li><li>The OpenConfig↔SONiC translation layer adds code</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/config_yang_validation/config_db_yang_validation.md">YANG validation</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/config-generic-update-rollback/SONiC_Generic_Config_Update_and_Rollback_Design.md">GCU &amp; rollback</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/mgmt/SONiC_YANG_Model_Guidelines.md">YANG guidelines</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>Ceph is a single implementation, and most of its configuration is tunables: thousands of options with types, defaults and levels (basic, advanced, dev) declared in the source. Moving config into the monitors' central store removed the drift between <code>ceph.conf</code> files on different hosts.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Simple and self-documenting (<code>ceph config help</code>)</li><li>Consistent across the cluster</li><li>Overrides per daemon and per host</li></ul></div><div><b class="con">Cons</b><ul><li>A huge number of options, so it's hard to know which matter</li><li>No industry-standard model</li><li>Some changes need a daemon restart</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/common/options/*.yaml.in</code> · <code>src/mon/ConfigMonitor.*</code></p></div>
+    <p class="bl"><b>Bottom line:</b> standards matter when many vendors must interoperate. A single implementation can use its own schema.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">10. How does it scale?</span><span class="chip s">SONiC: many small instances</span><span class="chip c">Ceph: one large logical system</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>Data-center networks scale out with Clos fabrics made of many identical switches, and the complexity lives in routing protocols and automation. Each SONiC instance stays small. Even multi-ASIC and chassis systems partition into per-ASIC namespaces instead of growing one big process.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Failures stay isolated</li><li>Linear scaling</li><li>Commodity boxes</li></ul></div><div><b class="con">Cons</b><ul><li>Managing thousands of boxes happens outside SONiC</li><li>Config drift between boxes</li><li>Every box must be upgraded individually</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/multi_asic/SONiC_multi_asic_hld.md">multi-ASIC HLD</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/voq/architecture.md">VOQ architecture</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>Users want one pool of capacity with one namespace. Ceph clusters grow by adding OSDs to the same logical system, and data rebalances automatically.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>One capacity pool</li><li>Automatic balancing</li><li>A single point of management</li></ul></div><div><b class="con">Cons</b><ul><li>Cluster-wide blast radius: a bad CRUSH change can move all the data</li><li>Operators often run several clusters to limit that risk</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/crush/</code> · <code>src/pybind/mgr/</code> (balancer, orchestrator)</p></div>
+    <p class="bl"><b>Bottom line:</b> SONiC scales by adding instances, while Ceph scales by growing one instance.</p>
+  </div></details>
+
+  <details class="dd"><summary><span class="dq">11. What threading model?</span><span class="chip s">SONiC: single-threaded orchagent</span><span class="chip c">Ceph: thread pools → Crimson shard-per-core</span></summary><div class="dd-body">
+    <div class="side s"><h5>Why SONiC chose this</h5><p>orchagent processes tables that depend on each other: ports, then interfaces, then neighbors, then routes. A single event loop gives deterministic ordering and much simpler code, and SAI calls went through one channel anyway. Throughput has been improved around the loop, with bulk SAI APIs, pipelining, ZMQ and async stages, rather than by making it multi-threaded.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Simple and deterministic</li><li>Easy to reason about and debug</li></ul></div><div><b class="con">Cons</b><ul><li>A throughput ceiling at very large route scale</li><li>One slow handler delays every other table</li></ul></div></div>
+      <p class="ev">Evidence: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/orchagent/orchagent_route_redesign.md">orchagent route redesign</a> · <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bgp_loading_optimization/bgp-loading-optimization-hld.md">BGP loading optimization</a></p></div>
+    <div class="side c"><h5>Why Ceph chose this</h5><p>An OSD serves many PGs and needs to use all its cores. The classic OSD uses sharded operation queues and thread pools. On fast NVMe, locks and context switches came to dominate, so Crimson rebuilds the OSD on Seastar: a shard-per-core, share-nothing design built on futures.</p>
+      <div class="pc"><div><b class="pro">Pros</b><ul><li>Multi-core throughput</li><li>Crimson aims for lower, more predictable latency per I/O</li></ul></div><div><b class="con">Cons</b><ul><li>Locking complexity and hard-to-reproduce bugs (classic OSD)</li><li>Crimson is a rewrite that has taken years</li></ul></div></div>
+      <p class="ev">Evidence: <code>src/osd/scheduler/</code> · <code>src/crimson/osd/</code></p></div>
+    <p class="bl"><b>Bottom line:</b> SONiC can stay simple because the ASIC does the heavy lifting. Ceph's CPU <em>is</em> its data plane, so it must scale across cores.</p>
+  </div></details>
+</section>
+
+<!-- SONiC FROM CEPH -->
+<section id="s-from-c">
+  <h2>What SONiC could benefit from Ceph</h2>
+  <p class="lede">Ideas from Ceph that would fit SONiC's constraints. Each item has a rough fit rating: <span class="fit hi">high fit</span> means it could be adopted with little conflict, <span class="fit md">partial fit</span> means it needs adapting.</p>
+
+  <div class="idea"><h4>Continuous scrubbing of state <span class="fit hi">high fit</span></h4>
+    <p>Ceph <em>scrubs</em> (compares replica metadata) and <em>deep-scrubs</em> (verifies data checksums) in the background on a schedule, so silent corruption is caught before it matters.</p>
+    <p class="how">For SONiC: a general scheduled consistency checker across CONFIG_DB → APPL_DB → ASIC_DB → hardware for every table, not only routes. Mismatches would be reported as structured health events. Some one-off checkers already exist, and the <a href="https://github.com/sonic-net/SONiC/blob/master/doc/event-alarm-framework/event-alarm-framework.md">event framework</a> could carry the results.</p></div>
+
+  <div class="idea"><h4>Named health checks with severity and mute <span class="fit hi">high fit</span></h4>
+    <p>Ceph reports health as <code>HEALTH_WARN</code> with stable codes (for example <code>OSD_DOWN</code>, <code>PG_DEGRADED</code>). Each code has documentation and remediation steps, and operators can mute a known issue for a set time.</p>
+    <p class="how">For SONiC: <a href="https://github.com/sonic-net/SONiC/blob/master/doc/system_health_monitoring/system-health-HLD.md">system-health</a> could adopt stable codes with documentation and muting, which would make fleet automation and alert routing simpler.</p></div>
+
+  <div class="idea"><h4>"ok-to-stop" safety APIs for maintenance <span class="fit hi">high fit</span></h4>
+    <p>Ceph answers "can I safely restart this daemon or host without losing availability?" before an operator acts (<code>ok-to-stop</code>, <code>noout</code> flags).</p>
+    <p class="how">For SONiC: a standard pre-upgrade check such as "is traffic drained? are peers redundant? is warm reboot supported for the current feature set?" Traffic shift-away already exists (<a href="https://github.com/sonic-net/SONiC/blob/master/doc/voq/Reliable_TSA.md">Reliable TSA</a>). Exposing it as a queryable safety gate is the Ceph idea.</p></div>
+
+  <div class="idea"><h4>Shard-per-core processing (Crimson) <span class="fit md">partial fit</span></h4>
+    <p>Crimson avoids locks by pinning shards of work to cores and passing messages between them.</p>
+    <p class="how">For SONiC: partition orchagent's work by table or by prefix range across cores to raise route-programming throughput. The obstacle is dependencies between Orch modules (routes depend on neighbors, which depend on ports), which is why the work is serialized today.</p></div>
+
+  <div class="idea"><h4>A cluster-level manager and orchestrator <span class="fit md">partial fit</span></h4>
+    <p>Ceph's MGR plus cephadm manage many nodes as one system: rolling upgrades, adding hosts, and one dashboard.</p>
+    <p class="how">For SONiC: this is usually done outside SONiC by each operator's own fleet tooling. An optional, open "fabric manager" reference built on gNMI/gNOI would lower the barrier for smaller operators. It must stay optional, because SONiC deliberately avoids coupling switches together (see <a href="#irreconcilable">irreconcilable</a>).</p></div>
+
+  <div class="idea"><h4>Versioned state with epochs <span class="fit md">partial fit</span></h4>
+    <p>Every Ceph map change bumps an epoch, and daemons can tell exactly which version they are acting on.</p>
+    <p class="how">For SONiC: tag CONFIG_DB changes with a monotonic generation number so that consumers, telemetry and <a href="https://github.com/sonic-net/SONiC/blob/master/doc/config-generic-update-rollback/README.md">GCU</a> can reason about "has change N been applied everywhere in the box?"</p></div>
+
+  <div class="idea"><h4>Upgrade-path testing at scale <span class="fit hi">high fit</span></h4>
+    <p>Ceph's <em>teuthology</em> framework runs large test suites, including upgrades from older releases on real clusters.</p>
+    <p class="how">For SONiC: sonic-mgmt already has testbeds. Standard N-1 → N warm-upgrade suites for every feature, run across vendors, would make it much safer to rely on warm reboot.</p></div>
+</section>
+
+<!-- CEPH FROM SONiC -->
+<section id="c-from-s">
+  <h2>What Ceph could benefit from SONiC</h2>
+
+  <div class="idea"><h4>A standard hardware-offload API <span class="fit md">partial fit</span></h4>
+    <p>SAI made "one software stack, many chips" work for switches. <a href="https://github.com/sonic-net/SONiC/blob/master/doc/dash/dash-sonic-hld.md">DASH</a> is extending the same idea to DPUs and SmartNICs.</p>
+    <p class="how">For Ceph: a vendor-neutral offload interface for erasure coding, compression, encryption, checksums or NVMe-oF on DPUs and computational storage, so that acceleration does not mean vendor lock-in. The partial fit is because Ceph's advantage is running anywhere in software, so offload must stay optional.</p></div>
+
+  <div class="idea"><h4>Restart the control plane without disturbing the data plane <span class="fit md">partial fit</span></h4>
+    <p>SONiC's <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/SONiC_Warmboot.md">warm restart</a> saves state, restarts, reconciles, and applies only the differences, while forwarding never stops.</p>
+    <p class="how">For Ceph: restarting an OSD today triggers PG peering and a short degraded state. State-preserving restarts (hand in-flight state to the new process, then reconcile) could shorten upgrade windows. It only partly fits, because in Ceph the data plane <em>is</em> the software process.</p></div>
+
+  <div class="idea"><h4>Inspectable state in a shared database <span class="fit hi">high fit</span></h4>
+    <p>In SONiC, almost any question about current state can be answered by reading a Redis table, with no special tools.</p>
+    <p class="how">For Ceph: much of the live state sits in daemon memory and is reached through admin sockets and per-daemon dump commands. A uniform, queryable state-export schema, even as read-only telemetry, would make debugging and automation easier.</p></div>
+
+  <div class="idea"><h4>Standard models: YANG, gNMI, OpenConfig <span class="fit md">partial fit</span></h4>
+    <p>SONiC exposes config and state through industry-standard models, so tools from many vendors work with it.</p>
+    <p class="how">For Ceph: storage has fewer model standards (SNIA Swordfish is one), but a schema-first management API with streaming subscriptions, rather than scrape-only metrics, would help large operators.</p></div>
+
+  <div class="idea"><h4>Formal HLD templates and a conformance program <span class="fit hi">high fit</span></h4>
+    <p>SONiC requires HLDs to follow a <a href="https://github.com/sonic-net/SONiC/blob/master/doc/guidelines/hld_template.md">template</a> that includes warm-boot impact, restrictions and a test plan. It also defines <a href="https://github.com/sonic-net/SONiC/blob/master/tsc/conformance/sonic_conformance_guideline.md">conformance guidelines</a> for distributions.</p>
+    <p class="how">For Ceph: a required "upgrade and recovery impact" section in design proposals, and a conformance program for downstream distributions and appliances.</p></div>
+
+  <div class="idea"><h4>Awareness of the network <span class="fit hi">high fit</span></h4>
+    <p>Ceph performance depends heavily on the network: replication traffic, recovery storms, and tail latency. SONiC exposes buffer, drop, PFC and queue telemetry (<a href="https://github.com/sonic-net/SONiC/blob/master/doc/high-frequency-telemetry/high-frequency-telemetry-hld.md">HFT</a>).</p>
+    <p class="how">For Ceph: use switch telemetry to throttle recovery when congestion appears, or to build CRUSH failure domains from real topology discovered through LLDP.</p></div>
+</section>
+
+<!-- IRRECONCILABLE -->
+<section id="irreconcilable">
+  <h2>Irreconcilable differences</h2>
+  <p class="lede">These are not preferences. Each follows directly from what the system exists to do, and changing one would turn the system into something else.</p>
+
+  <div class="irr"><h4>1. Soft state vs hard state</h4>
+    <p>SONiC can throw away its state and relearn it from config and neighbors. Ceph's state is the only copy of someone's data.</p>
+    <p class="why"><strong>Consequence:</strong> SONiC optimizes for restarting fast, and Ceph optimizes for never losing a write. SONiC can use in-memory Redis with no replicas. Ceph must write to disk, checksum, and replicate. Neither choice works for the other system.</p></div>
+
+  <div class="irr"><h4>2. Data plane in silicon vs in software</h4>
+    <p>SONiC's forwarding runs on fixed-function ASICs driven by vendor SDKs that are often closed. Ceph's I/O path is its own open code on CPUs.</p>
+    <p class="why"><strong>Consequence:</strong> SONiC can never be fully open or fully debuggable at the lowest layer, and features depend on what the chip supports. Ceph can change anything, but it pays CPU cost for every byte. Achieving line rate at Tbps requires silicon, and durable general-purpose storage requires software.</p></div>
+
+  <div class="irr"><h4>3. No consensus vs consensus</h4>
+    <p>Network resilience comes from each switch deciding for itself. A distributed routing protocol converges <em>without</em> a quorum. Ceph needs a Paxos quorum to agree on one authoritative cluster map.</p>
+    <p class="why"><strong>Consequence:</strong> adding a shared consensus layer across switches would couple their fates, so one bug or partition could take down a whole fabric. Removing consensus from Ceph would allow split-brain writes and data loss. Each system's key safety property comes from the opposite choice.</p></div>
+
+  <div class="irr"><h4>4. Opposite reactions to failure</h4>
+    <p>A switch reroutes in milliseconds because dropping a path costs nothing. Ceph deliberately <em>waits</em> before re-replicating, because moving terabytes on a false alarm is itself an outage.</p>
+    <p class="why"><strong>Consequence:</strong> the timers and tuning philosophies cannot be shared: aggressive detection for SONiC, patient and throttled recovery for Ceph.</p></div>
+
+  <div class="irr"><h4>5. Owning the box vs living on the box</h4>
+    <p>SONiC is the whole operating system image (installed through ONIE). It owns the kernel, drivers and platform. Ceph is an application stack that runs on whatever Linux the operator chooses.</p>
+    <p class="why"><strong>Consequence:</strong> SONiC must ship platform drivers, fan control and firmware tooling for every device (<a href="SONiC_Guide.html#platform">platform</a>). Ceph never has to, but it also cannot control the host's kernel or tuning.</p></div>
+
+  <div class="irr"><h4>6. Ecosystem shape: multi-vendor plug-ins vs one reference implementation</h4>
+    <p>SONiC is a shared core plus many vendor-supplied pieces (SAI, SDK, platform modules), spread across many repositories. Ceph is one vendor-neutral codebase that downstream vendors package.</p>
+    <p class="why"><strong>Consequence:</strong> SONiC's behavior can differ between platforms, so it needs conformance testing. Ceph behaves the same everywhere, but it has to implement everything itself. The multi-repo vs monorepo split (below) follows from this.</p></div>
+</section>
+
+<!-- REPOS -->
+<section id="repos">
+  <h2>How the repositories differ</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th class="s">SONiC</th><th class="c">Ceph</th></tr></thead>
+    <tbody>
+      <tr><th>Layout</th><td><strong>Many repos</strong> under <code>sonic-net</code>. <code>sonic-buildimage</code> ties them together with submodules. This <code>SONiC</code> repo is docs and governance only (<a href="https://github.com/sonic-net/SONiC/blob/master/sourcecode.md">sourcecode.md</a>).</td><td><strong>Monorepo</strong> <code>ceph/ceph</code>: <code>src/</code> (daemons, libraries, mgr modules), <code>doc/</code>, <code>qa/</code> (test suites).</td></tr>
+      <tr><th>Design docs</th><td>HLDs as Markdown in this repo's <a href="https://github.com/sonic-net/SONiC/tree/master/doc">doc/</a> folder, one folder per feature, using a <a href="https://github.com/sonic-net/SONiC/blob/master/doc/guidelines/hld_template.md">template</a>.</td><td>Developer docs in <code>doc/dev</code>, plus design discussion on mailing lists, trackers and developer summits.</td></tr>
+      <tr><th>Build</th><td>A Docker-based image build per ASIC platform (<code>sonic-&lt;vendor&gt;.bin</code>) plus a virtual switch image (<a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-build-system/SONiC-Reproduceable-Build.md">reproducible build</a>).</td><td>CMake. Packages (deb/rpm) and container images.</td></tr>
+      <tr><th>Testing</th><td><code>sonic-mgmt</code>: pytest + PTF against physical and virtual testbeds. Unit tests in each repo, and VS-based tests.</td><td>Unit tests, <code>make check</code>, and <em>teuthology</em> integration and upgrade suites in <code>qa/</code>.</td></tr>
+      <tr><th>Issue tracking</th><td>GitHub issues and PRs in each repo.</td><td>GitHub PRs plus a Redmine tracker.</td></tr>
+      <tr><th>Release model</th><td>Date-named branches twice a year. Vendors and operators often maintain their own downstream branches.</td><td>Named major releases with long-lived stable branches and point releases.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- INTERVIEW -->
+<section id="interview">
+  <h2>Interview angle</h2>
+  <div class="callout">If an interviewer asks you to "design S3" or "design a distributed KV store," Ceph is the real-world reference. If they ask about control planes, pipelines or hitless upgrades, SONiC is. Being able to explain <em>why</em> they differ (soft vs hard state) shows the kind of trade-off reasoning interviewers look for.</div>
+  <div class="grid">
+    <div class="card c"><h4>Ceph maps to…</h4><p><a href="Key_Concepts.html#v2-9">S3-like object storage</a>: RGW, replication vs EC, scrubbing.<br><a href="Key_Concepts.html#v1-6">Key-value store</a>: RocksDB, strong consistency.<br><a href="Key_Concepts.html#v1-5">Consistent hashing</a>: CRUSH and placement groups.<br><a href="Key_Concepts.html#v2-12">Digital wallet</a>: consensus (Paxos vs Raft).</p></div>
+    <div class="card s"><h4>SONiC maps to…</h4><p><a href="Key_Concepts.html#v2-4">Message queue</a>: producer/consumer tables, batching.<br><a href="Key_Concepts.html#v1-4">Rate limiter</a>: CoPP.<br><a href="Key_Concepts.html#v2-5">Metrics &amp; alerting</a>: flex counters, CRM.<br><a href="Key_Concepts.html#v2-11">Payment reconciliation</a>: warm-restart reconcile.</p></div>
+  </div>
+  <h3>Practice prompts</h3>
+  <ol>
+    <li>Why does Ceph wait before re-replicating a failed disk, while a switch reroutes instantly? Which would you choose for a cache tier, and why?</li>
+    <li>SONiC keeps its state in memory and Ceph keeps it on disk. For each one, describe what breaks if you swap the choice.</li>
+    <li>Design a consistency checker for SONiC based on Ceph's scrubbing. What would you compare, how often, and what do you do when something does not match?</li>
+    <li>CRUSH and ECMP both avoid lookup tables. What does each give up by doing so?</li>
+  </ol>
+</section>
+
+</main>
+</div>
+
+<footer><div class="wrap">← <a href="index.html">Home</a> · SONiC links open <a href="https://github.com/sonic-net/SONiC">sonic-net/SONiC</a> on GitHub. Ceph details are summarized from public documentation, so check them against the release you run.</div></footer>
+
+<button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle color theme">Toggle theme</button>
+<script>
+(function(){
+  var K='about-sonic-theme';
+  try{var t=localStorage.getItem(K); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){}
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var c=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    var n=c==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',n);
+    try{localStorage.setItem(K,n)}catch(e){}
+  });
+  var dds=[].slice.call(document.querySelectorAll('details.dd'));
+  document.getElementById('ddOpen').addEventListener('click',function(){dds.forEach(function(d){d.open=true})});
+  document.getElementById('ddClose').addEventListener('click',function(){dds.forEach(function(d){d.open=false})});
+})();
+</script>
+</body>
+</html>

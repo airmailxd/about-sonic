@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Design Q&amp;A</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f3f1ec; --text:#1d1c1a; --muted:#5f5b53;
+  --border:#e2ded5; --accent:#2f5d8a; --accent-soft:#e6eef6; --ok:#2d7a4b; --ok-soft:#e5f2ea;
+  --code-bg:#f1efe9; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+    --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ok:#7cc79a; --ok-soft:#1f3328;
+    --code-bg:#2a2925; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1f1e1b; --surface-2:#282723; --text:#ecebe6; --muted:#a8a498;
+  --border:#37352f; --accent:#8db7e0; --accent-soft:#223244; --ok:#7cc79a; --ok-soft:#1f3328;
+  --code-bg:#2a2925; --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.87em;background:var(--code-bg);padding:.1em .35em;border-radius:4px;word-break:break-word}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.topbar{border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar .wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;font-size:.92rem}
+.topbar a{text-decoration:none;color:var(--muted)}
+.topbar a.active{color:var(--text);font-weight:600}
+.topbar .brand{font-weight:700;color:var(--text);margin-right:auto;text-decoration:none}
+header{padding:44px 0 18px}
+header h1{font-size:clamp(1.8rem,4vw,2.5rem);line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+header p{color:var(--muted);margin:0;max-width:72ch}
+.kicker{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.toolbar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 0}
+.toolbar .wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.toolbar input[type=search]{flex:1 1 240px;min-width:0;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font:inherit}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:8px 12px;font:inherit;font-size:.9rem;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.count{font-size:.85rem;color:var(--muted)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;align-items:start;padding-top:20px}
+nav.side{position:sticky;top:70px;font-size:.86rem;border-left:2px solid var(--border);padding-left:14px;max-height:calc(100vh - 90px);overflow:auto}
+nav.side ol{list-style:none;margin:0;padding:0}
+nav.side li{margin:2px 0}
+nav.side a{text-decoration:none;color:var(--muted)}
+nav.side a:hover{color:var(--accent)}
+nav.side .grp{font-weight:600;color:var(--text);margin-top:12px;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+@media (max-width:820px){.layout{grid-template-columns:1fr}nav.side{position:static;border-left:none;padding-left:0;max-height:none}}
+.vol{font-size:1.7rem;margin:10px 0 4px}
+.vol-sub{color:var(--muted);margin:0 0 10px}
+.chapter{padding:18px 0 8px;border-top:1px solid var(--border)}
+.chapter h2{font-size:1.25rem;margin:0 0 4px}
+.chapter .gist{color:var(--muted);margin:0 0 12px;font-size:.95rem}
+details.qa{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:8px 0;box-shadow:var(--shadow)}
+details.qa summary{cursor:pointer;padding:12px 16px 12px 44px;font-weight:600;position:relative;list-style:none}
+details.qa summary::-webkit-details-marker{display:none}
+details.qa summary::before{content:"Q";position:absolute;left:14px;top:12px;width:22px;height:22px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:.8rem;display:grid;place-items:center}
+details.qa[open] summary{border-bottom:1px solid var(--border)}
+.ans{padding:12px 16px 14px 44px;position:relative}
+.ans::before{content:"A";position:absolute;left:14px;top:14px;width:22px;height:22px;border-radius:6px;background:var(--ok-soft);color:var(--ok);font-size:.8rem;font-weight:700;display:grid;place-items:center}
+.ans p{margin:0 0 8px}
+.ans ul{margin:4px 0 8px;padding-left:18px}
+.sonic{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--surface-2);font-size:.93rem}
+.sonic b{color:var(--accent)}
+.hidden{display:none!important}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);margin:8px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.9rem}
+th,td{text-align:left;vertical-align:top;padding:8px 11px;border-bottom:1px solid var(--border)}
+th{background:var(--surface-2)}
+tr:last-child td{border-bottom:none}
+.cheat{margin:10px 0 24px}
+footer{padding:28px 0 60px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--border);margin-top:24px}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:10;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 14px;font:inherit;font-size:.85rem;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <a class="brand" href="index.html">About SONiC</a>
+  <a href="index.html">Home</a>
+  <a href="SONiC_Guide.html">SONiC Guide</a>
+  <a href="Key_Concepts.html">Key Concepts</a>
+  <a class="active" href="System_Design_QA.html">System Design Q&amp;A</a>
+  <a href="SONiC_vs_Ceph.html">SONiC vs Ceph</a>
+  <a href="https://github.com/sonic-net/SONiC/blob/master/README.md">Repo README</a>
+</div></div>
+
+<header><div class="wrap">
+  <span class="kicker">Page 3 of 4 · Interview practice</span>
+  <h1>System Design Interview: Q&amp;A</h1>
+  <p>Questions and answers for the important topics in <em>System Design Interview</em> Vol. 1 and Vol. 2 by Alex Xu. Answer each question aloud before you open it. Where SONiC does the same thing in practice, a <b style="color:var(--accent)">SONiC example</b> ties the concept back to the <a href="SONiC_Guide.html">SONiC Guide</a> and the repo's design docs.</p>
+</div></header>
+
+<div class="toolbar"><div class="wrap">
+  <input type="search" id="q" placeholder="Filter questions (e.g. hashing, idempotent, Kafka)…" aria-label="Filter questions">
+  <button class="btn" id="expand" type="button">Expand all</button>
+  <button class="btn" id="collapse" type="button">Collapse all</button>
+  <span class="count" id="count"></span>
+</div></div>
+
+<div class="wrap layout">
+<nav class="side" aria-label="Chapters">
+  <ol>
+    <li><a href="#cheat">Cheat sheet</a></li>
+    <li class="grp">Volume 1</li>
+    <li><a href="#v1-scale">Scale from zero to millions</a></li>
+    <li><a href="#v1-estimate">Back-of-the-envelope</a></li>
+    <li><a href="#v1-framework">Interview framework</a></li>
+    <li><a href="#v1-rate">Rate limiter</a></li>
+    <li><a href="#v1-hash">Consistent hashing</a></li>
+    <li><a href="#v1-kv">Key-value store</a></li>
+    <li><a href="#v1-id">Unique ID generator</a></li>
+    <li><a href="#v1-url">URL shortener</a></li>
+    <li><a href="#v1-crawler">Web crawler</a></li>
+    <li><a href="#v1-notify">Notification system</a></li>
+    <li><a href="#v1-feed">News feed</a></li>
+    <li><a href="#v1-chat">Chat system</a></li>
+    <li><a href="#v1-auto">Search autocomplete</a></li>
+    <li><a href="#v1-youtube">YouTube</a></li>
+    <li><a href="#v1-drive">Google Drive</a></li>
+    <li class="grp">Volume 2</li>
+    <li><a href="#v2-proximity">Proximity service</a></li>
+    <li><a href="#v2-nearby">Nearby friends</a></li>
+    <li><a href="#v2-maps">Google Maps</a></li>
+    <li><a href="#v2-mq">Distributed message queue</a></li>
+    <li><a href="#v2-metrics">Metrics &amp; alerting</a></li>
+    <li><a href="#v2-ads">Ad click aggregation</a></li>
+    <li><a href="#v2-hotel">Hotel reservation</a></li>
+    <li><a href="#v2-email">Distributed email</a></li>
+    <li><a href="#v2-s3">S3-like object storage</a></li>
+    <li><a href="#v2-leader">Gaming leaderboard</a></li>
+    <li><a href="#v2-payment">Payment system</a></li>
+    <li><a href="#v2-wallet">Digital wallet</a></li>
+    <li><a href="#v2-stock">Stock exchange</a></li>
+  </ol>
+</nav>
+
+<main id="qa-root">
+
+<section id="cheat" class="cheat">
+  <h2 class="vol" style="font-size:1.3rem">Cheat sheet: recurring building blocks</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Building block</th><th>Use it for</th><th>SONiC example</th></tr></thead>
+    <tbody>
+      <tr><td>Load balancer / hashing</td><td>Spreading load, stateless tiers</td><td>ECMP hashing across next hops</td></tr>
+      <tr><td>Cache</td><td>Read-heavy hot data</td><td>Redis holding all switch state in memory</td></tr>
+      <tr><td>Message queue / pub-sub</td><td>Decoupling, absorbing bursts</td><td>Producer/ConsumerStateTable, ZMQ channel</td></tr>
+      <tr><td>Sharding</td><td>Write scale, data size</td><td>Per-ASIC namespaces, multiple Redis instances</td></tr>
+      <tr><td>Replication / failover</td><td>Availability</td><td>Dual ToR, MCLAG, SmartSwitch HA pairs</td></tr>
+      <tr><td>Rate limiting</td><td>Protecting shared resources</td><td>CoPP policers, syslog rate limit</td></tr>
+      <tr><td>Idempotency</td><td>Safe retries</td><td>Idempotent SAI API during warm restart</td></tr>
+      <tr><td>Monitoring</td><td>Knowing when things break</td><td>Flex counters, CRM, gNMI telemetry</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<h2 class="vol">Volume 1</h2>
+<p class="vol-sub">Foundations plus 12 classic design problems.</p>
+
+<!-- V1 CH1 -->
+<section class="chapter" id="v1-scale">
+  <h2>Scale from zero to millions of users</h2>
+  <p class="gist">Start with one server, then add a database tier, load balancers, replication, caches, a CDN, stateless web tiers, multiple data centers, queues and sharding.</p>
+  <details class="qa"><summary>Why make the web tier stateless, and where does the state go?</summary><div class="ans">
+    <p>A stateless tier lets any server handle any request, so you can autoscale and replace servers freely. Session state moves to a shared store (Redis, a NoSQL database), and the load balancer no longer needs sticky sessions.</p>
+    <div class="sonic"><b>SONiC example:</b> daemons such as orchagent keep little durable state of their own. The truth lives in Redis (CONFIG_DB/APPL_DB), so a crashed container can restart and rebuild its state from the database.</div></div></details>
+  <details class="qa"><summary>Vertical vs horizontal scaling: what are the trade-offs?</summary><div class="ans">
+    <p>Vertical scaling (a bigger machine) is simple but has a hard ceiling and leaves a single point of failure. Horizontal scaling (more machines) has no fixed ceiling and adds redundancy, but it needs load balancing, data partitioning, and handling of consistency.</p>
+    <div class="sonic"><b>SONiC example:</b> multi-ASIC and chassis systems scale out by running one SONiC stack per ASIC or line card rather than one ever-larger process.</div></div></details>
+  <details class="qa"><summary>What does database replication buy you, and what are the pitfalls?</summary><div class="ans">
+    <p>Primary/replica replication gives read scaling and failover. The pitfalls are replication lag (stale reads), promoting a replica that is behind, and split-brain when two nodes both think they are primary.</p></div></details>
+  <details class="qa"><summary>When do you add a cache, and what are its failure modes?</summary><div class="ans">
+    <p>Add a cache when the workload is read-heavy and some staleness is acceptable. Choose an expiration policy and an eviction policy (LRU/LFU). Watch for consistency between the cache and the database, a single point of failure, and a thundering herd on cold start or when a hot key expires.</p></div></details>
+  <details class="qa"><summary>Why add a message queue between tiers?</summary><div class="ans">
+    <p>A queue decouples producers from consumers, absorbs traffic spikes, and lets each side scale and fail independently.</p>
+    <div class="sonic"><b>SONiC example:</b> fpmsyncd (producer) and orchagent (consumer) meet at APPL_DB. A burst of a million BGP routes queues up there instead of overwhelming the hardware writer. See <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bgp_loading_optimization/bgp-loading-optimization-hld.md">BGP loading optimization</a>.</div></div></details>
+</section>
+
+<!-- V1 CH2 -->
+<section class="chapter" id="v1-estimate">
+  <h2>Back-of-the-envelope estimation</h2>
+  <p class="gist">Powers of two, latency numbers, availability "nines", QPS and storage math.</p>
+  <details class="qa"><summary>Estimate QPS and storage for 300M monthly users, 50% daily active, 2 posts per day, 10% with media.</summary><div class="ans">
+    <p>DAU = 150M. Write QPS ≈ 150M × 2 / 86,400 ≈ <strong>3,500</strong>. Peak ≈ 2× ≈ 7,000. Media storage ≈ 150M × 2 × 10% × 1 MB ≈ <strong>30 TB/day</strong>, or about 55 PB over 5 years.</p></div></details>
+  <details class="qa"><summary>How much downtime per year is 99.9% vs 99.99% availability?</summary><div class="ans">
+    <p>99.9% allows about 8.77 hours per year. 99.99% allows about 52.6 minutes. 99.999% allows about 5.26 minutes. Every added nine costs a lot more redundancy and automation.</p>
+    <div class="sonic"><b>SONiC example:</b> warm reboot exists because a planned upgrade with a cold reboot (minutes of outage) on every switch would use up an availability budget quickly.</div></div></details>
+  <details class="qa"><summary>Which latency numbers should you know by heart?</summary><div class="ans">
+    <ul><li>L1 cache ≈ 0.5 ns · main memory ≈ 100 ns</li><li>Compress 1 KB ≈ 10 µs · round trip in one data center ≈ 500 µs</li><li>Disk seek ≈ 10 ms · round trip from CA to Netherlands ≈ 150 ms</li></ul>
+    <p>The lessons: memory is fast and disk is slow, avoid disk seeks, compress before sending, and cross-region calls are expensive.</p></div></details>
+  <details class="qa"><summary>How would you estimate the time to program 1M routes into a switch?</summary><div class="ans">
+    <p>Break the pipeline into stages (BGP → FPM → Redis → orchagent → syncd → SAI). Estimate the per-route cost of each stage, or its batch throughput. The slowest stage sets the total time. If SAI can take about 50k routes/s, 1M routes need at least 20 s. Then check whether the other stages keep up and whether they overlap.</p>
+    <div class="sonic"><b>SONiC example:</b> <a href="https://github.com/sonic-net/SONiC/blob/master/doc/route-performance/README.md">route-performance</a> and <a href="https://github.com/sonic-net/SONiC/blob/master/doc/crm/Critical-Resource-Monitoring-High-Level-Design.md">CRM</a> are real capacity-planning docs.</div></div></details>
+</section>
+
+<!-- V1 CH3 -->
+<section class="chapter" id="v1-framework">
+  <h2>A framework for system design interviews</h2>
+  <p class="gist">Four steps: understand and scope (3–10 min), high-level design (10–15), deep dive (10–25), wrap up (3–5).</p>
+  <details class="qa"><summary>What should you clarify in step 1?</summary><div class="ans">
+    <p>Features in scope, number of users (DAU), read/write ratio, latency and consistency needs, data size and growth, existing tech constraints, and non-functional requirements (availability, security, cost). Write your assumptions down.</p></div></details>
+  <details class="qa"><summary>What are common red flags in a design interview?</summary><div class="ans">
+    <p>Jumping into a solution without clarifying the problem. Over-engineering. Going deep on one component too early. Ignoring trade-offs. Designing silently without talking to the interviewer.</p></div></details>
+  <details class="qa"><summary>What belongs in the wrap-up?</summary><div class="ans">
+    <p>Bottlenecks, failure scenarios, how to handle the next 10× of scale, monitoring and alerting, the rollout and upgrade strategy, and anything you would redesign given more time.</p>
+    <div class="sonic"><b>SONiC example:</b> SONiC HLDs end with "open issues" or "future work" sections. Reading them is good practice for wrap-ups. See <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/open_issues.md">warm-reboot open issues</a>.</div></div></details>
+</section>
+
+<!-- V1 CH4 -->
+<section class="chapter" id="v1-rate">
+  <h2>Design a rate limiter</h2>
+  <p class="gist">Algorithms, where to place the limiter, distributed counters, and rules plus headers.</p>
+  <details class="qa"><summary>Compare the five rate-limiting algorithms.</summary><div class="ans">
+    <ul>
+      <li><strong>Token bucket:</strong> tokens refill at rate r up to capacity b. Allows bursts. Simple and memory-efficient.</li>
+      <li><strong>Leaking bucket:</strong> a FIFO queue drained at a fixed rate. Produces smooth output, but bursts fill the queue.</li>
+      <li><strong>Fixed window counter:</strong> simple, but allows up to 2× the limit around window edges.</li>
+      <li><strong>Sliding window log:</strong> exact, but stores a timestamp for every request.</li>
+      <li><strong>Sliding window counter:</strong> weighted mix of the current and previous windows. A good approximation at low cost.</li>
+    </ul>
+    <div class="sonic"><b>SONiC example:</b> <a href="https://github.com/sonic-net/SONiC/blob/master/doc/copp/CoPP%20Config%20and%20Management.md">CoPP</a> uses hardware policers per trap group, a token-bucket-style CIR/CBS configuration, to protect the switch CPU. <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bum_storm_control/bum_storm_control_hld.md">Storm control</a> and <a href="https://github.com/sonic-net/SONiC/blob/master/doc/syslog/syslog-rate-limit-design.md">syslog rate limiting</a> apply the same idea.</div></div></details>
+  <details class="qa"><summary>Where should the rate limiter live?</summary><div class="ans">
+    <p>Client-side limits are unreliable. Server-side limits work, and so does middleware such as an API gateway. Put the limiter as close to the protected resource as the architecture allows, and as early as possible so that rejected work costs little.</p>
+    <div class="sonic"><b>SONiC example:</b> CoPP runs in the ASIC <em>before</em> packets reach the CPU. That is the cheapest place to drop them.</div></div></details>
+  <details class="qa"><summary>How do you rate-limit correctly across many servers?</summary><div class="ans">
+    <p>Keep the counters in a central store such as Redis, and use atomic operations (a Lua script or <code>INCR</code> + <code>EXPIRE</code>) to avoid race conditions. For multiple data centers, use eventual sync or local limits with a global budget. Return HTTP 429 with <code>X-Ratelimit-Remaining</code>, <code>-Limit</code> and <code>-Retry-After</code> headers.</p></div></details>
+  <details class="qa"><summary>Hard vs soft limits, and what happens to rejected requests?</summary><div class="ans">
+    <p>A hard limit never exceeds the threshold. A soft limit may exceed it briefly. Rejected requests can be dropped, or queued for later processing, for example orders that should not be lost.</p></div></details>
+</section>
+
+<!-- V1 CH5 -->
+<section class="chapter" id="v1-hash">
+  <h2>Design consistent hashing</h2>
+  <p class="gist">The rehashing problem, the hash ring, virtual nodes, and minimal key movement.</p>
+  <details class="qa"><summary>Why does <code>hash(key) % N</code> break when servers change?</summary><div class="ans">
+    <p>When N changes, almost every key maps to a different server. That causes a storm of cache misses or data migration. Consistent hashing moves only about K/N keys.</p></div></details>
+  <details class="qa"><summary>How does the hash ring work, and why use virtual nodes?</summary><div class="ans">
+    <p>Servers and keys are hashed onto a ring. Each key goes to the first server clockwise from it. With only a few real servers the partitions are uneven, so each server is placed at many points (virtual nodes). This evens out the load and also allows weighting servers by capacity.</p></div></details>
+  <details class="qa"><summary>Give a real-world example of "minimize disruption when membership changes."</summary><div class="ans">
+    <p>Network ECMP. A switch hashes each flow's 5-tuple to pick a next hop. With naive modulo hashing, losing one next hop reshuffles most flows and breaks TCP connections through stateful devices.</p>
+    <div class="sonic"><b>SONiC example:</b> <a href="https://github.com/sonic-net/SONiC/blob/master/doc/ecmp/fine_grained_next_hop_hld.md">Fine-grained next-hop groups</a> use a fixed bucket table. Only the failed member's buckets are reassigned, so other flows stay put, just as with consistent hashing. See also <a href="https://github.com/sonic-net/SONiC/blob/master/doc/vxlan/Consistent_ecmp_for_Vxlan_tunnel.md">consistent ECMP for VXLAN</a>.</div></div></details>
+</section>
+
+<!-- V1 CH6 -->
+<section class="chapter" id="v1-kv">
+  <h2>Design a key-value store</h2>
+  <p class="gist">CAP, partitioning, replication, quorum, versioning, failure detection, and the read/write paths.</p>
+  <details class="qa"><summary>Explain the CAP theorem and give CP and AP examples.</summary><div class="ans">
+    <p>When there is a network partition, a system must choose either Consistency (reject or block writes) or Availability (accept writes that may conflict). CP systems include a bank ledger or HBase. AP systems include Dynamo and Cassandra, which suit shopping carts. When there is no partition, the trade-off is latency vs consistency (PACELC).</p></div></details>
+  <details class="qa"><summary>How do N, W and R quorum settings trade off consistency and latency?</summary><div class="ans">
+    <p>N is the number of replicas, W the write acks required, and R the read responses required. If W + R &gt; N, a read overlaps the latest write, which gives strong consistency. W=1, R=N gives fast writes. W=N, R=1 gives fast reads. N=3, W=R=2 is the classic balance.</p></div></details>
+  <details class="qa"><summary>How are conflicting writes detected and resolved?</summary><div class="ans">
+    <p>With vector clocks ([server, version] pairs). If neither clock is an ancestor of the other, the writes conflict, and the client or the application reconciles them. The simpler alternative is last-write-wins, which can lose data.</p></div></details>
+  <details class="qa"><summary>How does the system handle failures?</summary><div class="ans">
+    <ul><li>Detection: the gossip protocol (heartbeat counters).</li><li>Temporary failures: a sloppy quorum plus hinted handoff.</li><li>Permanent failures: anti-entropy with Merkle trees to find the replicas that differ.</li><li>Data-center outages: replicate across data centers.</li></ul></div></details>
+  <details class="qa"><summary>Describe the write and read paths of an LSM-based store.</summary><div class="ans">
+    <p>Write: append to the commit log, write to the memtable, and flush to an SSTable when the memtable is full. Read: check the memtable, then consult Bloom filters to skip SSTables that cannot contain the key, then read the SSTable. Background compaction merges SSTables.</p></div></details>
+  <details class="qa"><summary>How does SONiC use a key-value store as its backbone, and how does it scale it?</summary><div class="ans">
+    <div class="sonic"><b>SONiC example:</b> all switch state lives in Redis, in logical databases separated by role (CONFIG/APPL/ASIC/STATE/COUNTERS). Under heavy route churn a single Redis instance became a hot spot. The fix was to <a href="https://github.com/sonic-net/SONiC/blob/master/doc/database/multi_database_instances.md">partition the logical databases across several Redis instances</a> (reported 20–30% faster) and, on multi-ASIC systems, <a href="https://github.com/sonic-net/SONiC/blob/master/doc/multi_asic/DB_Design_for_multi_asic.md">one instance per ASIC namespace</a>. This is functional sharding plus physical sharding.</div></div></details>
+</section>
+
+<!-- V1 CH7 -->
+<section class="chapter" id="v1-id">
+  <h2>Design a unique ID generator</h2>
+  <p class="gist">Multi-master auto-increment, UUID, ticket server, and Twitter Snowflake.</p>
+  <details class="qa"><summary>Compare the four approaches.</summary><div class="ans">
+    <ul><li><strong>Multi-master</strong> (increment by k): hard to add servers, and IDs are not time-ordered across servers.</li><li><strong>UUID:</strong> no coordination, but 128 bits, not numeric, and not sortable.</li><li><strong>Ticket server:</strong> simple numeric IDs, but a single point of failure.</li><li><strong>Snowflake:</strong> 64 bits, time-sortable, no coordination at runtime.</li></ul></div></details>
+  <details class="qa"><summary>What is the Snowflake bit layout?</summary><div class="ans">
+    <p>1 sign bit · 41 bits of millisecond timestamp since a custom epoch (about 69 years) · 5 bits data center · 5 bits machine · 12 bits sequence (4,096 IDs per ms per machine). Watch out for clock skew (use NTP, and refuse to issue IDs if the clock moves backwards).</p></div></details>
+  <details class="qa"><summary>Why might you need a stable "virtual" ID on top of a system-assigned ID?</summary><div class="ans">
+    <p>When the underlying system reassigns IDs, for example after a restart, other components that store the old IDs would break.</p>
+    <div class="sonic"><b>SONiC example:</b> sairedis hands orchagent <em>virtual</em> object IDs (VIDs). syncd maps them to <em>real</em> hardware IDs (RIDs). After warm reboot the RIDs may change, but the VIDs stay valid, so the software above never notices. See <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/view_switch.md">view_switch.md</a>.</div></div></details>
+</section>
+
+<!-- V1 CH8 -->
+<section class="chapter" id="v1-url">
+  <h2>Design a URL shortener</h2>
+  <p class="gist">API, 301 vs 302, hash-plus-collision vs base-62 conversion, caching, and the read-heavy workload.</p>
+  <details class="qa"><summary>301 or 302 redirect?</summary><div class="ans">
+    <p>A 301 (permanent) is cached by browsers, which reduces server load. A 302 (temporary) sends every click to your server, which enables click analytics.</p></div></details>
+  <details class="qa"><summary>How long must the short code be?</summary><div class="ans">
+    <p>With base 62, 62⁷ ≈ 3.5 trillion codes. That covers 365 billion URLs (100M per day for 10 years), so 7 characters is enough.</p></div></details>
+  <details class="qa"><summary>Hash + collision resolution vs base-62 of a unique ID: which is better?</summary><div class="ans">
+    <p>Hashing (a CRC/MD5 prefix) needs collision checks, which a Bloom filter can speed up. Base-62 of a unique ID (from a Snowflake-style generator) never collides and is simple, but its codes are predictable and it needs an ID service.</p></div></details>
+  <details class="qa"><summary>How do you scale the redirect path?</summary><div class="ans">
+    <p>Cache <code>short → long</code> mappings, since reads far outnumber writes. Keep the web servers stateless behind a load balancer, add database read replicas, and rate-limit abusive clients.</p></div></details>
+</section>
+
+<!-- V1 CH9 -->
+<section class="chapter" id="v1-crawler">
+  <h2>Design a web crawler</h2>
+  <p class="gist">BFS, the URL frontier, politeness and priority, deduplication, robustness, and extensibility.</p>
+  <details class="qa"><summary>What does the URL frontier do?</summary><div class="ans">
+    <p>It holds the URLs still to be downloaded and enforces two things. <strong>Priority:</strong> front queues ordered by page importance. <strong>Politeness:</strong> back queues, one per host, each drained by a single worker with delays, so no site is hammered. Most of the frontier lives on disk, with in-memory buffers.</p></div></details>
+  <details class="qa"><summary>How do you avoid duplicate URLs and duplicate content?</summary><div class="ans">
+    <p>Keep a "URL seen?" check (a Bloom filter or hash set), and hash page content (a checksum or simhash) to detect duplicate or near-duplicate pages. Also guard against spider traps with a maximum URL length and depth.</p></div></details>
+  <details class="qa"><summary>How do you make the crawler robust and extensible?</summary><div class="ans">
+    <p>Use consistent hashing to spread load across downloaders, save crawl state for recovery, and handle exceptions gracefully. Content processing uses a plug-in module chain, so a new content type (images, PDFs) is just another module.</p>
+    <div class="sonic"><b>SONiC example:</b> the same "add features as plug-ins" idea appears in the <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-application-extension/sonic-application-extention-hld.md">SONiC Application Extension</a> framework.</div></div></details>
+</section>
+
+<!-- V1 CH10 -->
+<section class="chapter" id="v1-notify">
+  <h2>Design a notification system</h2>
+  <p class="gist">Push (APNs/FCM), SMS, email, queues per channel, reliability, deduplication, templates, and settings.</p>
+  <details class="qa"><summary>Sketch the high-level design.</summary><div class="ans">
+    <p>Services call a notification API, which authenticates, rate-limits and validates the request. Notifications are fetched and rendered from templates and user settings, then placed on <strong>one queue per channel</strong> (iOS, Android, SMS, email). Workers call the third-party providers. Keeping a queue per channel means an outage at one provider does not block the others.</p></div></details>
+  <details class="qa"><summary>How do you avoid losing notifications or sending duplicates?</summary><div class="ans">
+    <p>Persist a notification log and retry with backoff. Delivery is at-least-once, so deduplicate on the consumer side using an event ID. True exactly-once delivery is not achievable.</p></div></details>
+  <details class="qa"><summary>How is a notification system like structured event publishing on a device?</summary><div class="ans">
+    <div class="sonic"><b>SONiC example:</b> the <a href="https://github.com/sonic-net/SONiC/blob/master/doc/event-alarm-framework/event-alarm-framework.md">event-alarm framework</a> replaces log scraping with events that follow a YANG schema. The <a href="https://github.com/sonic-net/SONiC/blob/master/doc/event-alarm-framework/events-producer.md">events producer</a> publishes them to subscribers such as gNMI collectors. The <a href="https://github.com/sonic-net/SONiC/blob/master/doc/orchagent/notification_queue_policy_hld.md">notification queue policy</a> decides what happens when consumers fall behind: a bounded queue plus a drop or merge policy.</div></div></details>
+</section>
+
+<!-- V1 CH11 -->
+<section class="chapter" id="v1-feed">
+  <h2>Design a news feed system</h2>
+  <p class="gist">Feed publishing, fanout on write vs read, the hybrid approach, and caching layers.</p>
+  <details class="qa"><summary>Fanout on write vs fanout on read?</summary><div class="ans">
+    <p><strong>On write (push):</strong> the feed is precomputed, so reads are fast. But it is wasteful for inactive users and very expensive for celebrities with millions of followers. <strong>On read (pull):</strong> no wasted work, but reads are slow. <strong>Hybrid:</strong> push for most users, and pull celebrity posts at read time.</p></div></details>
+  <details class="qa"><summary>What do you cache?</summary><div class="ans">
+    <p>A news-feed cache holding only post IDs, a content cache for hot posts, social-graph caches, action caches (likes) and counters. Store IDs in the feed and hydrate them on read.</p></div></details>
+  <details class="qa"><summary>How is "coalescing repeated updates" relevant to feed-like pipelines?</summary><div class="ans">
+    <div class="sonic"><b>SONiC example:</b> if a route flaps 5 times before orchagent reads it, ConsumerStateTable only sees the latest value, because the pending-key set holds each key once. Fanout pipelines can use the same trick to avoid wasted downstream work. See the <a href="SONiC_Guide.html#databases">SONiC Guide: databases</a>.</div></div></details>
+</section>
+
+<!-- V1 CH12 -->
+<section class="chapter" id="v1-chat">
+  <h2>Design a chat system</h2>
+  <p class="gist">Polling vs long polling vs WebSocket, stateful chat servers, message storage, ordering, and presence.</p>
+  <details class="qa"><summary>Which transport should you use for real-time messages?</summary><div class="ans">
+    <p>Polling is simple but wasteful. Long polling still needs reconnections and makes it hard to detect disconnects. <strong>WebSocket</strong> gives a bidirectional, persistent connection and is the usual choice. Plain HTTP is fine for non-real-time APIs such as login and profile.</p></div></details>
+  <details class="qa"><summary>What storage suits chat history, and how do you order messages?</summary><div class="ans">
+    <p>A wide-column key-value store (HBase, Cassandra) handles very high write volume and range reads of recent messages. Order messages by an ID that is unique and sortable within the channel, either from a Snowflake-style generator or a local sequence.</p></div></details>
+  <details class="qa"><summary>How do you implement online presence?</summary><div class="ans">
+    <p>Clients send periodic heartbeats. If no heartbeat arrives within a timeout, the user is marked offline, which avoids flapping on short disconnects. Status changes are fanned out to friends through pub/sub channels.</p>
+    <div class="sonic"><b>SONiC example:</b> liveness detection in networks works the same way. BFD sends rapid heartbeats between peers, and a missed-detection multiplier declares a peer down. See <a href="https://github.com/sonic-net/SONiC/blob/master/doc/smart-switch/BFD/SmartSwitchDpuLivenessUsingBfd.md">DPU liveness via BFD</a>.</div></div></details>
+  <details class="qa"><summary>How are long-lived subscription connections handled for streaming data?</summary><div class="ans">
+    <div class="sonic"><b>SONiC example:</b> the gNMI telemetry server keeps persistent gRPC streams to collectors (dial-in), or opens them itself (dial-out). The design issues are like a chat server's: connection state, reconnects, and back-pressure. See <a href="https://github.com/sonic-net/SONiC/blob/master/doc/system-telemetry/grpc_telemetry.md">gRPC telemetry</a> and <a href="https://github.com/sonic-net/SONiC/blob/master/doc/system-telemetry/dialout.md">dial-out</a>.</div></div></details>
+</section>
+
+<!-- V1 CH13 -->
+<section class="chapter" id="v1-auto">
+  <h2>Design a search autocomplete system</h2>
+  <p class="gist">Trie with cached top-k results, a data-gathering service, and a query service.</p>
+  <details class="qa"><summary>How do you make top-k lookups fast in a trie?</summary><div class="ans">
+    <p>Limit the prefix length, and cache the top-k queries at every node. A lookup then takes O(1) time after walking the prefix. This trades memory for latency.</p></div></details>
+  <details class="qa"><summary>Should you update the trie in real time?</summary><div class="ans">
+    <p>Usually not. Aggregate the query logs offline (for example weekly), rebuild the trie with workers, and swap it in. Serve it from a trie cache backed by a key-value store. Filter harmful suggestions at the serving layer.</p></div></details>
+  <details class="qa"><summary>How do you scale the trie storage?</summary><div class="ans">
+    <p>Shard by prefix. Because letters are unevenly distributed, use a shard-map manager that splits or merges ranges according to historical load, rather than a naive a–m / n–z split.</p></div></details>
+</section>
+
+<!-- V1 CH14 -->
+<section class="chapter" id="v1-youtube">
+  <h2>Design YouTube</h2>
+  <p class="gist">Upload to blob storage, a transcoding DAG, CDN streaming, and cost optimization.</p>
+  <details class="qa"><summary>Walk through the upload flow.</summary><div class="ans">
+    <p>The client gets a pre-signed URL and uploads directly to blob storage. Transcoding servers run a DAG of tasks (inspect, encode to several resolutions and codecs, thumbnails, watermark). The outputs go to storage and the CDN. The metadata is updated, and a completion event notifies the client. Metadata updates can run in parallel with the upload.</p></div></details>
+  <details class="qa"><summary>How do you speed up and harden uploads?</summary><div class="ans">
+    <p>Split uploads into GOP-aligned chunks and make them resumable. Place upload centers close to users, and use message queues between stages so they are loosely coupled and can run in parallel.</p></div></details>
+  <details class="qa"><summary>How do you control CDN cost?</summary><div class="ans">
+    <p>Serve only popular videos from the CDN, and serve the long tail from your own servers. Encode unpopular videos on demand, and keep region-specific content in that region.</p></div></details>
+</section>
+
+<!-- V1 CH15 -->
+<section class="chapter" id="v1-drive">
+  <h2>Design Google Drive</h2>
+  <p class="gist">Block servers, delta sync, deduplication, strong consistency for metadata, and conflict resolution.</p>
+  <details class="qa"><summary>Why split files into blocks?</summary><div class="ans">
+    <p>Delta sync then uploads only changed blocks. Blocks can be compressed and encrypted, and identical blocks are deduplicated by their hash. This saves a lot of bandwidth and storage.</p></div></details>
+  <details class="qa"><summary>How are sync conflicts resolved?</summary><div class="ans">
+    <p>The first version to be processed wins. The later one is kept as a conflicting copy for the user to merge. Metadata must be strongly consistent, so it goes in a relational database with ACID transactions.</p></div></details>
+  <details class="qa"><summary>How do clients learn about changes?</summary><div class="ans">
+    <p>A notification service using long polling. When a client is told something changed, it pulls the new metadata and blocks.</p></div></details>
+  <details class="qa"><summary>How is "diff and apply" used for configuration, and what about rollback?</summary><div class="ans">
+    <div class="sonic"><b>SONiC example:</b> <a href="https://github.com/sonic-net/SONiC/blob/master/doc/config-generic-update-rollback/SONiC_Generic_Config_Update_and_Rollback_Design.md">Generic Config Update</a> takes a JSON Patch (the delta), validates it against YANG, orders the operations by dependency, and applies them. <em>Checkpoints</em> are saved versions. Rollback computes the patch between the current config and a checkpoint, the same delta-sync idea applied to config.</div></div></details>
+</section>
+
+<h2 class="vol" style="margin-top:34px">Volume 2</h2>
+<p class="vol-sub">Deeper problems: geospatial, streaming, storage, and financial systems.</p>
+
+<!-- V2 -->
+<section class="chapter" id="v2-proximity">
+  <h2>Proximity service</h2>
+  <p class="gist">Find nearby businesses: geohash, quadtree, Google S2.</p>
+  <details class="qa"><summary>Compare geohash and quadtree.</summary><div class="ans">
+    <p><strong>Geohash</strong> encodes lat/long into a base-32 string. A shared prefix means the points are close, and it is easy to store in any key-value store or database index. Edge cases: points near a cell border can have different prefixes, so also search the 8 neighbouring cells. <strong>Quadtree</strong> is an in-memory tree that subdivides until each leaf has at most K businesses. It adapts to density but must be rebuilt or updated, which makes it harder to operate. <strong>S2</strong> maps the sphere onto a Hilbert curve and supports arbitrary regions (geofences).</p></div></details>
+  <details class="qa"><summary>How do you scale reads?</summary><div class="ans">
+    <p>Business data changes rarely, so it is read-heavy. Use read replicas and a cache keyed by geohash, holding a list of business IDs, plus a business-info cache. Deploy in multiple regions to reduce latency.</p></div></details>
+</section>
+
+<section class="chapter" id="v2-nearby">
+  <h2>Nearby friends</h2>
+  <p class="gist">Real-time location updates over WebSocket with Redis pub/sub fanout.</p>
+  <details class="qa"><summary>How do location updates flow?</summary><div class="ans">
+    <p>The client sends its location over WebSocket every ~30 s. The server updates a location cache (with a TTL), appends to a history database, and publishes to the user's own Redis pub/sub channel. Friends' WebSocket handlers subscribe to that channel, compute the distance, and push updates to clients within range.</p></div></details>
+  <details class="qa"><summary>How do you scale Redis pub/sub?</summary><div class="ans">
+    <p>Shard the channels across a Redis cluster using consistent hashing, with service discovery (for example ZooKeeper or etcd) holding the hash ring. The work is CPU-bound, so size the cluster by CPU. When adding nodes, resubscribe carefully to avoid a storm of resubscriptions.</p>
+    <div class="sonic"><b>SONiC example:</b> SONiC relies heavily on Redis pub/sub and keyspace notifications for daemons to learn about changes. It is a single-node example of pub/sub fanout. See the <a href="SONiC_Guide.html#databases">SONiC Guide</a>.</div></div></details>
+</section>
+
+<section class="chapter" id="v2-maps">
+  <h2>Google Maps</h2>
+  <p class="gist">Map tiles, routing tiles, hierarchical graphs, ETA, and navigation updates.</p>
+  <details class="qa"><summary>How is the map rendered efficiently?</summary><div class="ans">
+    <p>Precompute tiles at each zoom level and serve them as static images or vectors from a CDN. The client calculates which tile URLs it needs from its position and zoom level, and servers take no part in that.</p></div></details>
+  <details class="qa"><summary>How is routing made tractable on a planet-sized graph?</summary><div class="ans">
+    <p>Split the road graph into routing tiles at several levels of detail (local streets, arterials, highways). A* or Dijkstra runs over the tiles loaded on demand. ETAs combine the route with live and historical traffic, often through ML models.</p></div></details>
+  <details class="qa"><summary>How does routing in a switch compare?</summary><div class="ans">
+    <div class="sonic"><b>SONiC example:</b> BGP computes paths hop by hop instead of globally, and the switch holds only next hops per prefix. The RIB/FIB split (control plane vs forwarding table) resembles "compute routes" vs "serve tiles." See <a href="https://github.com/sonic-net/SONiC/blob/master/doc/ribfib/sonic-fib_lld.md">SONiC FIB LLD</a>.</div></div></details>
+</section>
+
+<section class="chapter" id="v2-mq">
+  <h2>Distributed message queue</h2>
+  <p class="gist">Topics, partitions, consumer groups, a write-ahead log, replication with ISR, and delivery semantics.</p>
+  <details class="qa"><summary>Why store messages as an append-only log on disk?</summary><div class="ans">
+    <p>Sequential disk I/O is fast, especially with the OS page cache and batching. Segment files are easy to retain and delete. Consumers track their own offsets, so re-reading is cheap and the broker stays simple.</p></div></details>
+  <details class="qa"><summary>How do partitions and consumer groups work?</summary><div class="ans">
+    <p>A topic is split into partitions, and ordering is guaranteed only within a partition, so choose the key carefully. Within a consumer group, each partition is consumed by one consumer. Parallelism is therefore capped by the partition count, and a coordinator rebalances partitions when consumers join or leave.</p></div></details>
+  <details class="qa"><summary>What do acks=0/1/all mean, and how do you get each delivery semantic?</summary><div class="ans">
+    <p>acks=0 is fastest, and messages may be lost. acks=1 waits for the leader only. acks=all waits for every in-sync replica (ISR) and is the most durable. <strong>At-most-once:</strong> commit the offset before processing. <strong>At-least-once:</strong> commit after processing. <strong>Exactly-once:</strong> at-least-once plus idempotent processing or transactions.</p></div></details>
+  <details class="qa"><summary>What trade-offs appear in a producer-side batching pipeline?</summary><div class="ans">
+    <p>Larger batches and fewer flushes give higher throughput but add latency and memory use. Small batches give low latency but more per-message overhead.</p>
+    <div class="sonic"><b>SONiC example:</b> in the <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bgp_loading_optimization/bgp-loading-optimization-hld.md">BGP loading HLD</a>, the bottlenecks turned out to be "fpmsyncd flushes the pipeline too frequently" and "pipeline size is too small." That is exactly this trade-off. The <a href="https://github.com/sonic-net/SONiC/blob/master/doc/sonic-swss-common/ZMQ%20producer-consumer%20state%20table%20design.md">ZMQ producer/consumer</a> design is a lighter message queue for hot paths, with async sends and retries when the queue is full or the connection breaks.</div></div></details>
+</section>
+
+<section class="chapter" id="v2-metrics">
+  <h2>Metrics monitoring &amp; alerting</h2>
+  <p class="gist">Collection (pull vs push), a time-series database, a Kafka buffer, downsampling, and alert rules.</p>
+  <details class="qa"><summary>Pull vs push collection?</summary><div class="ans">
+    <p><strong>Pull</strong> (Prometheus): easy health detection because a failed scrape means the target is down, but it needs service discovery and has trouble with short-lived jobs and firewalls. <strong>Push</strong> (agents): works across firewalls and for short jobs, but it is harder to tell a dead host from a quiet one. Many systems use both.</p>
+    <div class="sonic"><b>SONiC example:</b> SONiC does both. SNMP and gNMI Get are pull. gNMI Subscribe, dial-out and <a href="https://github.com/sonic-net/SONiC/blob/master/doc/high-frequency-telemetry/high-frequency-telemetry-hld.md">high-frequency telemetry</a> are push.</div></div></details>
+  <details class="qa"><summary>Why a time-series database, and how do you control storage?</summary><div class="ans">
+    <p>The workload is write-heavy, with time-range and aggregation queries over labelled series. TSDBs optimize this with columnar compression (delta-of-delta, Gorilla). Keep storage under control with downsampling (raw data for 7 days, 1-minute data for 30 days, 1-hour data for a year) and cold storage.</p></div></details>
+  <details class="qa"><summary>How is collection done on the device side?</summary><div class="ans">
+    <div class="sonic"><b>SONiC example:</b> <a href="https://github.com/sonic-net/SONiC/blob/master/doc/flex_counter/flex_counter_refactor.md">Flex counters</a>: orchagent registers which counters to poll, and at what interval, in FLEX_COUNTER_DB. syncd polls the ASIC in bulk and writes COUNTERS_DB. <a href="https://github.com/sonic-net/SONiC/blob/master/doc/crm/Critical-Resource-Monitoring-High-Level-Design.md">CRM</a> applies threshold alerting with high and low watermarks, which avoids flapping alerts. <a href="https://github.com/sonic-net/SONiC/blob/master/doc/system_health_monitoring/system-health-HLD.md">System health</a> aggregates everything into an overall status.</div></div></details>
+</section>
+
+<section class="chapter" id="v2-ads">
+  <h2>Ad click event aggregation</h2>
+  <p class="gist">Streaming aggregation, windows, watermarks, exactly-once, and reconciliation.</p>
+  <details class="qa"><summary>Lambda vs Kappa architecture?</summary><div class="ans">
+    <p>Lambda runs a batch path and a streaming path in parallel, which means two codebases. Kappa uses only the streaming path and handles reprocessing by replaying the log. Kappa is simpler if the stream engine is reliable enough.</p></div></details>
+  <details class="qa"><summary>Event time vs processing time, and what are watermarks?</summary><div class="ans">
+    <p>Event time is when the click actually happened. It is accurate, but events arrive late. A watermark extends a window to wait for stragglers: longer is more accurate but adds latency. Events that arrive after the watermark are corrected by end-of-day reconciliation.</p></div></details>
+  <details class="qa"><summary>How do you get exactly-once aggregation?</summary><div class="ans">
+    <p>Store the consumer offset together with the aggregation result, atomically or in a distributed transaction. Deduplicate events by ID. Use a batch reconciliation job as a final check.</p></div></details>
+  <details class="qa"><summary>Window types?</summary><div class="ans">
+    <p>Tumbling windows are fixed and do not overlap (clicks per minute). Sliding or hopping windows overlap (top ads in the last M minutes). Session windows are separated by gaps in activity.</p></div></details>
+</section>
+
+<section class="chapter" id="v2-hotel">
+  <h2>Hotel reservation system</h2>
+  <p class="gist">Concurrency control, idempotency, overbooking, and data partitioning.</p>
+  <details class="qa"><summary>How do you prevent double booking?</summary><div class="ans">
+    <p>There are three options. <strong>Pessimistic locking</strong> (<code>SELECT … FOR UPDATE</code>) is safe but has contention and deadlock risk. <strong>Optimistic locking</strong> uses a version column and retries on conflict, which is good when contention is low. <strong>Database constraints</strong> (<code>CHECK total_reserved ≤ total_inventory</code>) are simple but hard to apply across tables.</p></div></details>
+  <details class="qa"><summary>How do you stop a user from booking twice when they click "Submit" twice?</summary><div class="ans">
+    <p>Generate an <strong>idempotency key</strong> (the reservation ID) when the booking page loads, and put a unique constraint on it. A duplicate submission fails the constraint and returns the original result.</p>
+    <div class="sonic"><b>SONiC example:</b> idempotency is essential during warm restart. Replaying state into syncd must not create duplicate hardware objects, so the <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/sai_redis_api_idempotence.md">SAI Redis API is made idempotent</a>.</div></div></details>
+  <details class="qa"><summary>How do you scale it?</summary><div class="ans">
+    <p>Shard by <code>hotel_id</code>, cache inventory with the database as the source of truth, and split into microservices. When a transaction must span services, use a saga or 2PC, or keep those tables in one database.</p></div></details>
+</section>
+
+<section class="chapter" id="v2-email">
+  <h2>Distributed email service</h2>
+  <p class="gist">SMTP/IMAP, metadata storage, search, attachments, and deliverability.</p>
+  <details class="qa"><summary>What storage suits email metadata?</summary><div class="ans">
+    <p>The access pattern is per-user, mostly recent, with read/unread filtering. A wide-column store partitioned by <code>user_id</code>, with denormalized tables (for example read and unread as separate tables) to avoid costly filters. Attachments go in object storage.</p></div></details>
+  <details class="qa"><summary>How do you build search?</summary><div class="ans">
+    <p>Use either a general search cluster (Elasticsearch, updated asynchronously through Kafka) or a custom per-user index built into the storage engine (an LSM tree optimized for heavy writes). Search is per mailbox, which makes partitioning simple.</p></div></details>
+  <details class="qa"><summary>How do you protect deliverability?</summary><div class="ans">
+    <p>Use dedicated IPs, warm them up gradually, classify and throttle outbound mail, handle bounces and complaints quickly, and set up SPF, DKIM and DMARC.</p></div></details>
+</section>
+
+<section class="chapter" id="v2-s3">
+  <h2>S3-like object storage</h2>
+  <p class="gist">Separate metadata from data, append-to-file data nodes, durability, and multipart upload.</p>
+  <details class="qa"><summary>Why separate the metadata store from the data store?</summary><div class="ans">
+    <p>They have very different profiles. Metadata is small, mutable and queried. Object data is large, immutable and read by ID. Separating them lets each scale and be optimized on its own terms, much like a UNIX inode vs its data blocks.</p></div></details>
+  <details class="qa"><summary>Replication vs erasure coding?</summary><div class="ans">
+    <p>3× replication has 200% overhead and gives simple, fast reads. Erasure coding (for example 8+4) has 50% overhead and similar or better durability, but reads and repairs cost more CPU and network. Use replication for hot data and erasure coding for cold data.</p></div></details>
+  <details class="qa"><summary>How do you store many small objects efficiently?</summary><div class="ans">
+    <p>Append objects into large read-write files. When a file is full, seal it as read-only. Keep an object-ID → (file, offset, size) mapping in a local database such as RocksDB or SQLite. Deletes only mark objects, and compaction reclaims the space later.</p></div></details>
+  <details class="qa"><summary>How do you detect corruption and support versioning?</summary><div class="ans">
+    <p>Store a checksum with each object or segment and verify it on read. For versioning, add a version ID (for example a TimeUUID) to the metadata, and make a delete write a delete marker.</p></div></details>
+</section>
+
+<section class="chapter" id="v2-leader">
+  <h2>Real-time gaming leaderboard</h2>
+  <p class="gist">Redis sorted sets, scaling out, and ties.</p>
+  <details class="qa"><summary>Why Redis sorted sets instead of SQL?</summary><div class="ans">
+    <p>A sorted set is a hash plus a skip list. <code>ZINCRBY</code>, <code>ZREVRANGE</code> for the top 10, and <code>ZREVRANK</code> for a user's rank all run in O(log n). Ranking with SQL means sorting large tables on every query, which does not work in real time.</p></div></details>
+  <details class="qa"><summary>How do you scale beyond one Redis node?</summary><div class="ans">
+    <p>Either use fixed partitions by score range, which makes the top-N query easy, or hash partitions, which need a scatter-gather to find the top N. Persist scores to a database as the source of truth, and rebuild Redis from it if needed.</p></div></details>
+</section>
+
+<section class="chapter" id="v2-payment">
+  <h2>Payment system</h2>
+  <p class="gist">Payment service, PSP integration, ledger, wallet, reconciliation, retries, and idempotency.</p>
+  <details class="qa"><summary>How do you guarantee a customer is never charged twice?</summary><div class="ans">
+    <p>Pass an <strong>idempotency key</strong> (for example the order ID) to your own API and to the PSP. Combine at-least-once retries with idempotent processing to get effectively exactly-once behaviour.</p></div></details>
+  <details class="qa"><summary>How do you handle failures and retries?</summary><div class="ans">
+    <p>Persist the payment state machine. Retry transient errors with exponential backoff and jitter. Send messages that keep failing to a dead-letter queue. Never retry non-retryable errors, such as an invalid card.</p></div></details>
+  <details class="qa"><summary>Why reconciliation, and what is double-entry bookkeeping?</summary><div class="ans">
+    <p>Async systems drift, so a nightly job compares your ledger with the PSP and bank settlement files and flags mismatches. Double-entry means every transaction debits one account and credits another by the same amount, so all entries sum to zero. This makes errors detectable.</p>
+    <div class="sonic"><b>SONiC example:</b> reconciliation is also central to SONiC. After warm restart, the new desired state is compared with what the hardware actually has, and only the differences are applied. See <a href="https://github.com/sonic-net/SONiC/blob/master/doc/warm-reboot/swss_warm_restart.md">SWSS warm restart</a>.</div></div></details>
+</section>
+
+<section class="chapter" id="v2-wallet">
+  <h2>Digital wallet</h2>
+  <p class="gist">Balance transfers at scale: distributed transactions, event sourcing, and CQRS.</p>
+  <details class="qa"><summary>Compare 2PC, TC/C and Saga.</summary><div class="ans">
+    <ul><li><strong>2PC:</strong> database-level prepare/commit. Strong consistency, but locks are held and the coordinator is a single point of failure.</li><li><strong>TC/C</strong> (Try-Confirm/Cancel): application-level with compensating actions. No long locks, but more code.</li><li><strong>Saga:</strong> a sequence of local transactions, each with a compensating transaction. Can be choreographed or orchestrated. Good for long-lived flows.</li></ul></div></details>
+  <details class="qa"><summary>What is event sourcing, and why use it for a wallet?</summary><div class="ans">
+    <p>Store an immutable log of commands and events, and derive the state (balances) by replaying them. The result is fully auditable and reproducible. Combine it with CQRS: one write model, and many read models built from the event stream. Snapshots speed up replay.</p>
+    <div class="sonic"><b>SONiC example:</b> sairedis can record every SAI operation to a recording file (<code>sairedis.rec</code>) that can be replayed to reproduce issues. It is a lightweight form of event sourcing used for debugging.</div></div></details>
+  <details class="qa"><summary>How do you make the event log highly available?</summary><div class="ans">
+    <p>Replicate it with a consensus protocol (Raft) across several nodes. This is state-machine replication: every node applies the same log in the same order and ends up in the same state.</p></div></details>
+</section>
+
+<section class="chapter" id="v2-stock">
+  <h2>Stock exchange</h2>
+  <p class="gist">Order book, matching engine, sequencer, very low latency, and determinism.</p>
+  <details class="qa"><summary>What are the critical-path components?</summary><div class="ans">
+    <p>The path is client gateway → risk checks → order manager → <strong>sequencer</strong> (stamps sequence IDs so there is a total order) → <strong>matching engine</strong> (price-time priority on the order book) → sequencer → market data and reporting.</p></div></details>
+  <details class="qa"><summary>How do you achieve microsecond latency?</summary><div class="ans">
+    <p>Put everything on one server. Pin a single thread per component to a CPU core, with no context switches or locks. Communicate through shared memory (mmap) or ring buffers. Avoid garbage collection and disk on the critical path. Keep the design deterministic so that a hot-warm replica can take over by replaying the same event log.</p></div></details>
+  <details class="qa"><summary>Why is a single-threaded, deterministic core a good idea?</summary><div class="ans">
+    <p>No locks and no contention, predictable latency, and easy replication by replay.</p>
+    <div class="sonic"><b>SONiC example:</b> orchagent is also a single-threaded event loop that processes table changes in order. That keeps it simple and deterministic, but it can become a throughput limit at scale. <a href="https://github.com/sonic-net/SONiC/blob/master/doc/orchagent/orchagent_route_redesign.md">Orchagent route redesign</a> and the <a href="https://github.com/sonic-net/SONiC/blob/master/doc/bgp_loading_optimization/bgp-loading-optimization-hld.md">BGP loading HLD</a> discuss adding async and parallel stages around it.</div></div></details>
+</section>
+
+<p id="empty" class="hidden" style="color:var(--muted);padding:20px 0">No questions match your filter.</p>
+</main>
+</div>
+
+<footer><div class="wrap">← <a href="SONiC_Guide.html">SONiC Guide</a> · Topics follow <em>System Design Interview</em> Vol. 1 &amp; 2 (Alex Xu; Vol. 2 with Sahn Lam). Answers are study summaries, not quotations. SONiC links open <a href="https://github.com/sonic-net/SONiC">sonic-net/SONiC</a> on GitHub.</div></footer>
+
+<button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle color theme">Toggle theme</button>
+<script>
+(function(){
+  var K='about-sonic-theme';
+  try{var t=localStorage.getItem(K); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){}
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var c=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    var n=c==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',n);
+    try{localStorage.setItem(K,n)}catch(e){}
+  });
+
+  var items=[].slice.call(document.querySelectorAll('details.qa'));
+  var chapters=[].slice.call(document.querySelectorAll('section.chapter'));
+  var count=document.getElementById('count'), empty=document.getElementById('empty');
+  function update(){
+    var q=document.getElementById('q').value.trim().toLowerCase(), shown=0;
+    items.forEach(function(d){
+      var chap=d.closest('section.chapter');
+      var hay=(d.textContent+' '+chap.querySelector('h2').textContent).toLowerCase();
+      var hit=!q||hay.indexOf(q)!==-1;
+      d.classList.toggle('hidden',!hit); if(hit) shown++;
+    });
+    chapters.forEach(function(s){
+      s.classList.toggle('hidden',!s.querySelector('details.qa:not(.hidden)'));
+    });
+    count.textContent=shown+' of '+items.length+' questions';
+    empty.classList.toggle('hidden',shown>0);
+  }
+  document.getElementById('q').addEventListener('input',update);
+  document.getElementById('expand').addEventListener('click',function(){items.forEach(function(d){if(!d.classList.contains('hidden'))d.open=true})});
+  document.getElementById('collapse').addEventListener('click',function(){items.forEach(function(d){d.open=false})});
+  update();
+})();
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@ with the [SONiC](https://github.com/sonic-net/SONiC) network operating system. E
 | [Key Concepts](Key_Concepts.html) | Every chapter of both volumes: big picture, concepts, flows, trade-offs, pitfalls, acronyms, SONiC tie-ins |
 | [System Design Q&A](System_Design_QA.html) | Interview-style questions with expandable answers and SONiC examples |
 | [Hello Interview](Hello_Interview.html) | The Hello Interview guide topic by topic: delivery framework, core concepts, key technologies, patterns, advanced topics, and question breakdowns, with Alex Xu cross-links and SONiC tie-ins |
+| [Interview Examples](Interview_Examples.html) | 20 sample designs walked through as in a real interview, with a "why this?" dropdown for every building block and beginner primers for each technology |
 | [SONiC vs Ceph](SONiC_vs_Ceph.html) | Design-decision comparison of SONiC and Ceph |
 
 Design-doc links point to the upstream [sonic-net/SONiC](https://github.com/sonic-net/SONiC) repository.

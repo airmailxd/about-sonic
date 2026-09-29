@@ -29,7 +29,7 @@
   // Label table cells from their column headers so rows can stack as cards on phones.
   [].forEach.call(document.querySelectorAll('table'),function(t){
     t.classList.add('stack');
-    if(t.classList.contains('tr')) return; // pros/cons tables already mark cells with + and −
+    if(t.classList.contains('tr')||t.hasAttribute('data-nolabel')) return; // pros/cons tables mark cells with + and −; two-column tables need no labels
     var heads=[].map.call(t.querySelectorAll('thead tr:first-child th'),function(h){return h.textContent.trim();});
     if(!heads.length) return;
     [].forEach.call(t.querySelectorAll('tbody tr'),function(r){
